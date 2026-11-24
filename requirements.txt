@@ -1,0 +1,2 @@
+# Virelix runs on the Python 3.11+ standard library only. No packages are required.
+

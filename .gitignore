@@ -1,0 +1,66 @@
+# ---------------------------------------------------------------------------
+# Private runtime data — NEVER commit.
+# data/ holds accounts, password hashes, sessions, verification/reset/invitation
+# token records, the development outbox, workspaces (history, saved items,
+# collections), private attachments, notifications, the audit log, the built
+# index and the server lock. Only the empty placeholder is versioned.
+# ---------------------------------------------------------------------------
+/data/*
+!/data/.gitkeep
+
+# Local configuration and secrets (OWNER_EMAIL, keys). Only the template is shared.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.python-version
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Browser tests (development-only tooling)
+node_modules/
+tests/e2e/results/
+tests/e2e/playwright-report/
+tests/e2e/blob-report/
+tests/e2e/.auth/
+tests/e2e/playwright/.cache/
+*.trace.zip
+*.webm
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
+*.swp
+*~
+
+# Local assistant/tool state and instructions (kept on the developer's machine, not shared)
+.claude/
+CLAUDE.md
+.mcp.json
+.cursor/
+.cursorrules
+.aider*
+.impeccable/
+.vscode/
+.idea/
+
+# Operating system files
+.DS_Store
+Thumbs.db
+desktop.ini
