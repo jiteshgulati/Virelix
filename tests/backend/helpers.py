@@ -82,6 +82,7 @@ class ServerTestCase(unittest.TestCase):
     """Starts one server per test class with a private copy of the corpus."""
 
     corpus_files: list[str] | None = None  # None = full sample corpus
+    fixture_docs: dict[str, str] = {}      # extra synthetic documents: filename -> text
 
     @classmethod
     def setUpClass(cls):
@@ -91,6 +92,8 @@ class ServerTestCase(unittest.TestCase):
         for f in sorted((ROOT / "corpus").glob("*.txt")):
             if cls.corpus_files is None or f.name in cls.corpus_files:
                 shutil.copy(f, corpus / f.name)
+        for name, text in cls.fixture_docs.items():
+            (corpus / name).write_text(text, encoding="utf-8")
         cls.cfg = Config(host="127.0.0.1", port=0, env="development", owner_email=OWNER_EMAIL,
                          secret_key="test", corpus_dir=corpus, data_dir=cls.tmp / "data",
                          frontend_dir=ROOT / "frontend", dev_mailbox=True, quiet=True, register_rate_limit=10_000, dev_mailbox_key=DEV_KEY)

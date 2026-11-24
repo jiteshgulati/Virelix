@@ -1,21 +1,24 @@
-"""Inverted-index data model.
+"""Inverted index: the data structure behind ranked search.
 
 Structures
 ----------
-``Posting``         one (document, term) pair with its term frequency and token positions.
-``DocumentRecord``  per-document metadata the index needs (title, length).
-``InvertedIndex``   ``dict[term, dict[doc_id, Posting]]`` plus document
-                    metadata and vocabulary statistics.
+``Posting``         one (document, term) pair: term frequency and token positions.
+``DocumentRecord``  per-document metadata needed for filtering, sorting and display.
+``InvertedIndex``   ``dict[term, dict[doc_id, Posting]]`` plus document records and
+                    vocabulary statistics.
 
-Interface
+Definitions
+-----------
+* **Term frequency** ``tf(t, d)``: occurrences of term ``t`` in document ``d``
+  (title tokens followed by body tokens).
+* **Document frequency** ``df(t)``: number of distinct documents containing ``t``.
+* **Positions**: token offsets, used for exact-phrase matching.
+
+Lifecycle
 ---------
-* ``add_document`` / ``remove_document`` populate the structure from
-  preprocessed tokens; ``stats`` / ``vocabulary`` / ``postings_for`` inspect it.
-* ``to_dict`` / ``from_dict`` / ``save`` / ``load`` give a JSON representation.
-
-The index is built and inspected from Admin → Index management. Search does not
-query it yet: results come from the document search preview in ``preview.py``,
-and ranked retrieval over these postings is not implemented.
+``build_index`` constructs an index from loaded documents; ``validate`` checks
+internal consistency; ``save``/``load`` persist it as versioned JSON (written
+atomically). Query processing and ranking live in ``engine.py``.
 """
 
 from __future__ import annotations
@@ -27,7 +30,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable
 
-FORMAT_VERSION = 1
+FORMAT_VERSION = 2  # v2: document records carry ``modified`` for date sorting
 
 
 @dataclass
@@ -45,6 +48,7 @@ class DocumentRecord:
     length: int                      # number of tokens after preprocessing
     unique_terms: int
     metadata: dict = field(default_factory=dict)
+    modified: str = ""
 
 
 class InvertedIndex:
@@ -130,6 +134,28 @@ class InvertedIndex:
             "postings": {t: {d: [p.tf, p.positions] for d, p in per.items()} for t, per in self.postings.items()},
         }
 
+    def validate(self) -> list[str]:
+        """Return consistency problems (an empty list means the index is sound)."""
+        problems = []
+        lengths: dict[str, int] = {d: 0 for d in self.documents}
+        for term, per in self.postings.items():
+            if not term or not per:
+                problems.append(f"empty term or posting list: {term!r}")
+                continue
+            for doc_id, p in per.items():
+                if doc_id not in self.documents:
+                    problems.append(f"posting for unknown document {doc_id} under {term!r}")
+                    continue
+                if p.tf != len(p.positions) or p.tf < 1:
+                    problems.append(f"tf/positions mismatch for {term!r} in {doc_id}")
+                if p.positions != sorted(set(p.positions)):
+                    problems.append(f"unordered positions for {term!r} in {doc_id}")
+                lengths[doc_id] += p.tf
+        for doc_id, rec in self.documents.items():
+            if lengths.get(doc_id, 0) != rec.length:
+                problems.append(f"length mismatch for {doc_id}")
+        return problems[:20]
+
     @classmethod
     def from_dict(cls, data: dict) -> "InvertedIndex":
         if data.get("format_version") != FORMAT_VERSION:
@@ -152,16 +178,30 @@ class InvertedIndex:
         return cls.from_dict(json.loads(path.read_text(encoding="utf-8")))
 
 
-def initialize_foundation(documents, *, remove_stopwords: bool = False) -> InvertedIndex:
+def indexable_text(doc) -> str:
+    """Title then body, without indexing the same line twice.
+
+    A document without a metadata header takes its title from its first line;
+    that line is already part of the body, so it isn't prepended again
+    (otherwise its words would count double in term frequencies).
+    """
+    first_line = next((ln.strip().lstrip("#").strip() for ln in doc.text.split("\n") if ln.strip()), "")
+    if doc.title and doc.title != first_line:
+        return f"{doc.title}\n{doc.text}"
+    return doc.text
+
+
+def build_index(documents, *, remove_stopwords: bool = False) -> InvertedIndex:
     """Build an index from loaded ``Document`` objects (title and body tokens)."""
     from backend.search.preprocess import tokenize
     started = time.perf_counter()
     idx = InvertedIndex()
     idx.settings = {"remove_stopwords": remove_stopwords}
     for doc in documents:
-        tokens = tokenize(f"{doc.title}\n{doc.text}", remove_stopwords=remove_stopwords)
+        tokens = tokenize(indexable_text(doc), remove_stopwords=remove_stopwords)
         idx.add_document(DocumentRecord(doc.doc_id, doc.title, doc.filename, 0, 0,
-                                        {k: v for k, v in doc.metadata.items() if k != "summary"}), tokens)
+                                        {k: v for k, v in doc.metadata.items() if k != "summary"},
+                                        doc.modified), tokens)
     idx.build_ms = round((time.perf_counter() - started) * 1000, 2)
     idx.built_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
     return idx

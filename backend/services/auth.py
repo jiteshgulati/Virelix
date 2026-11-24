@@ -14,7 +14,7 @@ DEFAULT_PREFS = {
     "sidebar": "expanded",        # expanded | collapsed
     "motion": "system",           # system | reduce | full
     "save_history": True,
-    "default_mode": "all",        # all | any | phrase
+    "default_mode": "any",        # any | all | phrase; any = a document matches if it contains at least one query term
     "per_page": 10,
     "default_sources": ["corpus", "attachments"],
     "show_excerpts": True,

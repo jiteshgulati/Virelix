@@ -1,1 +1,1 @@
-"""Search engine: document loader, text preprocessing, inverted index and document search preview."""
+"""Search engine: document loader, text preprocessing, inverted index, ranked retrieval and overviews."""
