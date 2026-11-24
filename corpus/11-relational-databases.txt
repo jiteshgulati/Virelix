@@ -1,0 +1,16 @@
+Title: Relational Databases and SQL
+Author: Virelix Editorial
+Category: Databases
+Tags: sql, relational model, normalization
+Date: 2024-03-22
+Source: Virelix sample corpus
+---
+A relational database organizes data into tables of rows and columns. Each table represents a relation, each row a tuple and each column an attribute with a defined type. The relational model, introduced by Edgar Codd in 1970, separates the logical structure of data from how it is physically stored.
+
+SQL is the standard language for relational databases. SELECT statements retrieve data, filtering rows with WHERE, combining tables with JOIN and summarizing with GROUP BY. INSERT, UPDATE and DELETE modify data. Because SQL is declarative, the user describes what result is wanted and the query optimizer decides how to compute it.
+
+Normalization reduces redundancy. In third normal form every non-key attribute depends on the key, the whole key and nothing but the key. Normalized schemas avoid update anomalies, where the same fact stored in two places becomes inconsistent.
+
+Indexes speed up queries. A B-tree index on a column lets the database find matching rows without scanning the entire table. Most databases also offer full-text indexes, which are inverted indexes over text columns, for keyword search inside the database.
+
+Transactions group operations into units that succeed or fail together. The ACID properties, atomicity, consistency, isolation and durability, guarantee that concurrent users see a coherent view of the data and that committed changes survive crashes. Search engines often keep their authoritative data in a relational database and build specialized indexes from it.

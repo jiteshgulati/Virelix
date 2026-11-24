@@ -1,0 +1,16 @@
+Title: NoSQL Data Models
+Author: Virelix Editorial
+Category: Databases
+Tags: nosql, document stores, key-value
+Date: 2024-04-05
+Source: Virelix sample corpus
+---
+NoSQL describes databases that do not use the traditional relational table model. The term covers several families with different strengths.
+
+Key-value stores, such as Redis, map keys to opaque values and offer very fast lookups. They are popular for caching, session storage and counters. Document stores, such as MongoDB, store semi-structured documents, usually JSON, and allow queries on fields inside those documents. Wide-column stores, such as Apache Cassandra, organize data into rows with flexible column families and are designed for very large write-heavy workloads. Graph databases, such as Neo4j, model entities and relationships directly and excel at traversals like friend-of-a-friend queries.
+
+Many NoSQL systems were designed for horizontal scaling across many machines. They often relax strict consistency in favour of availability, following the trade-offs described by the CAP theorem. Some provide eventual consistency, where replicas converge over time, while others offer tunable consistency per operation.
+
+Schema flexibility is both an advantage and a risk. Applications can evolve quickly without migrations, but without discipline the same collection can accumulate documents with incompatible shapes.
+
+Search engines such as Elasticsearch are sometimes grouped with document stores. They store JSON documents and build inverted indexes over their fields, combining flexible storage with full-text retrieval and aggregations.

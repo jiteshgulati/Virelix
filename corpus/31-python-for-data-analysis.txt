@@ -1,0 +1,16 @@
+Title: Python for Data Analysis
+Author: Virelix Editorial
+Category: Data Analysis
+Tags: python, pandas, matplotlib
+Date: 2024-08-09
+Source: Virelix sample corpus
+---
+Python has become a leading language for data analysis thanks to a rich ecosystem of libraries and a readable syntax.
+
+pandas provides the DataFrame, a two-dimensional labelled table similar to a spreadsheet or a SQL table. DataFrames support filtering rows, selecting columns, grouping and aggregating, joining tables and reshaping data. Reading a CSV or JSON log file into a DataFrame takes one function call, after which questions such as "which ten queries were searched most often?" become a short chain of operations: group by query, count and sort.
+
+matplotlib is the foundational plotting library. It produces line charts, bar charts, histograms and scatter plots, and its logarithmic axes make it suitable for rank-frequency plots used to examine Zipf's law. Charts should have labelled axes, units and titles so that they can be understood without the code that produced them.
+
+NumPy underpins both libraries with efficient multi-dimensional arrays and vectorized operations that run far faster than equivalent Python loops.
+
+A reproducible analysis records where data came from, how it was cleaned and which code generated each figure. Notebooks are convenient for exploration, while scripts are easier to test and run automatically. Before analysing usage logs, it is important to collect them deliberately, with a defined schema and attention to privacy, because conclusions drawn from fabricated or incomplete data are worthless.

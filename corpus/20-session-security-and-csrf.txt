@@ -1,0 +1,16 @@
+Title: Session Security and CSRF
+Author: Virelix Editorial
+Category: Security
+Tags: sessions, csrf, cookies
+Date: 2024-05-24
+Source: Virelix sample corpus
+---
+After a user signs in, the server issues a session identifier, usually stored in a cookie. Anyone who obtains that identifier can impersonate the user, so session tokens must be generated with a cryptographically secure random number generator and must be long enough to resist guessing.
+
+Session cookies should be marked HttpOnly so that injected scripts cannot read them, Secure so that they are only sent over HTTPS, and SameSite to limit when browsers attach them to cross-site requests. Sessions need an expiry, and logging out must invalidate the session on the server rather than only deleting the cookie in the browser.
+
+Cross-site request forgery tricks a victim's browser into sending an authenticated request to a site where the victim is signed in. Because browsers attach cookies automatically, a malicious page could submit a form that changes the victim's password or deletes data.
+
+Defences include anti-CSRF tokens, which are random values that a malicious site cannot read and that must accompany every state-changing request. In the double-submit pattern the token is stored in a cookie and also sent in a request header, and the server checks that both match. Checking the Origin header and using SameSite cookies add further layers.
+
+Applications should rotate session identifiers at login to prevent session fixation and should revoke all sessions when a password is changed or an account is suspended.

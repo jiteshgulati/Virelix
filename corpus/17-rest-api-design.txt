@@ -1,0 +1,16 @@
+Title: REST API Design Principles
+Author: Virelix Editorial
+Category: Web Technologies
+Tags: rest, api design, json
+Date: 2024-05-03
+Source: Virelix sample corpus
+---
+Representational State Transfer is an architectural style for networked applications described by Roy Fielding. A RESTful API exposes resources identified by URLs and manipulated through a uniform interface, usually the standard HTTP methods.
+
+Good resource naming uses nouns rather than verbs. A collection of documents might live at /documents and a single document at /documents/42. The HTTP method expresses the action: GET reads, POST creates, PATCH updates and DELETE removes.
+
+Consistent error responses make APIs easier to use. A machine-readable error code, a human-readable message and, for validation failures, details about each invalid field let clients present helpful feedback. Status codes should be accurate: 400 for malformed input, 401 when authentication is missing, 403 when an authenticated user lacks permission, 404 when a resource does not exist and 409 for conflicts such as duplicates.
+
+Pagination prevents responses from growing without limit. Offset-based pagination with page and page-size parameters is simple and supports jumping to a page. Cursor-based pagination is more robust when data changes between requests.
+
+Versioning, through the URL or a header, allows the API to evolve without breaking existing clients. Documentation that lists each endpoint, its parameters, its responses and its authorization requirements is as important as the implementation. Security must be enforced on the server for every endpoint, because any client, including a modified browser, can send arbitrary requests.

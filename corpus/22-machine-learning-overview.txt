@@ -1,0 +1,16 @@
+Title: Machine Learning Overview
+Author: Virelix Editorial
+Category: Machine Learning
+Tags: machine learning, supervised learning, models
+Date: 2024-06-07
+Source: Virelix sample corpus
+---
+Machine learning builds systems that improve their performance on a task by learning from data rather than following explicitly programmed rules.
+
+Supervised learning trains a model on labelled examples, pairs of inputs and desired outputs. Classification predicts discrete categories, such as whether an email is spam, while regression predicts continuous values, such as a house price. Unsupervised learning finds structure in unlabelled data; clustering groups similar items and dimensionality reduction compresses data while preserving important variation. Reinforcement learning trains agents to choose actions that maximize long-term reward through trial and error.
+
+Training adjusts model parameters to minimize a loss function that measures prediction error. Gradient descent iteratively moves parameters in the direction that reduces the loss.
+
+The central challenge is generalization: performing well on new data rather than memorizing the training set. Overfitting occurs when a model captures noise in the training data. Practitioners hold out validation and test sets, use regularization and prefer simpler models when performance is similar.
+
+Machine learning plays a growing role in search. Learning-to-rank methods train models to order results using many features, including term-frequency scores, document quality signals and user behaviour. Even so, classical retrieval based on inverted indexes remains the first stage of most search systems, quickly reducing millions of documents to a candidate set that more expensive models can re-rank.

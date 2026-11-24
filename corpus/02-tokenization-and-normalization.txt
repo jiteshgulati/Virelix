@@ -1,0 +1,16 @@
+Title: Tokenization and Text Normalization
+Author: Virelix Editorial
+Category: Natural Language Processing
+Tags: tokenization, preprocessing, normalization
+Date: 2024-01-15
+Source: Virelix sample corpus
+---
+Tokenization splits raw text into units called tokens. For English search systems a token is usually a word or a number, but the exact rules matter because every later stage of a search engine depends on them.
+
+A simple tokenizer lowercases text, replaces punctuation with spaces and splits on whitespace. This handles most prose well. Difficult cases include hyphenated words such as "state-of-the-art", contractions such as "don't", abbreviations such as "U.S.", version numbers such as "3.11", and email addresses. Each project must decide how to treat them and apply the decision consistently to documents and queries.
+
+Normalization makes equivalent strings identical. Case folding is the most common step. Unicode normalization converts compatibility characters, such as full-width letters or the "fi" ligature, into their standard forms. Accent folding may map "café" to "cafe", although that can merge words that are genuinely different in some languages.
+
+Whitespace normalization collapses tabs, newlines and repeated spaces into single separators. Without it, a tokenizer can emit empty tokens that pollute the vocabulary.
+
+The most important property of a preprocessing pipeline is symmetry: the same function must process both the indexed documents and incoming queries. If documents are lowercased but queries are not, a search for "Python" will never match the indexed term "python". Good test suites therefore include empty strings, punctuation-only strings, mixed case, Unicode input and very long inputs.

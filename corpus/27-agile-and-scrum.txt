@@ -1,0 +1,16 @@
+Title: Agile Development and Scrum
+Author: Virelix Editorial
+Category: Software Engineering
+Tags: agile, scrum, project management
+Date: 2024-07-12
+Source: Virelix sample corpus
+---
+Agile software development emphasizes delivering working software in small increments, collaborating closely with stakeholders and responding to change. The Agile Manifesto of 2001 values individuals and interactions, working software, customer collaboration and responding to change over their more formal counterparts.
+
+Scrum is a popular agile framework. Work is organized into fixed-length iterations called sprints, typically one to four weeks long. The product owner maintains a prioritized product backlog. At sprint planning the team selects backlog items it can complete and defines a sprint goal. During the sprint a short daily meeting keeps everyone aligned.
+
+At the end of each sprint the team demonstrates completed work in a sprint review and reflects on its process in a retrospective. A shared definition of done, which might include passing tests, code review and documentation, ensures that completed means genuinely complete.
+
+Milestone-based academic projects benefit from similar discipline. Dividing a four-week project into weekly goals, each with explicit acceptance criteria, makes progress visible and exposes risks early. A first week focused on requirements, architecture and foundational components reduces integration problems later.
+
+Agile does not mean the absence of planning. It means planning continuously at the right level of detail, keeping long-term plans coarse and short-term plans precise, and being honest about what is finished and what is not.

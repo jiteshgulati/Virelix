@@ -1,0 +1,16 @@
+Title: Tries and Prefix Search
+Author: Virelix Editorial
+Category: Data Structures
+Tags: tries, autocomplete, prefix
+Date: 2024-03-01
+Source: Virelix sample corpus
+---
+A trie, also called a prefix tree, stores strings by sharing common prefixes. Each edge is labelled with a character, and the path from the root to a node spells a prefix. Nodes that end a complete word are marked.
+
+Tries make prefix queries efficient. To find every word beginning with "comp", the algorithm follows four edges from the root and then enumerates the subtree below. The cost depends on the length of the prefix and the number of results, not on the total number of stored words. This is why tries are widely used for autocomplete and spelling suggestions.
+
+A naive trie can waste memory because many nodes have a single child. Compressed tries, known as radix trees or Patricia tries, merge chains of single-child nodes into one edge labelled with a string. Ternary search trees offer another compromise between memory and speed.
+
+Search engines often combine a hash-based vocabulary for exact lookups with a sorted or trie-based structure for wildcard and prefix queries. A query such as "index*" is expanded into every vocabulary term with that prefix, and the postings lists of those terms are combined with a union.
+
+Tries also support fuzzy matching. By walking the tree while tracking an edit-distance budget, a spelling corrector can find dictionary words within one or two edits of a misspelled query without comparing against every word individually.

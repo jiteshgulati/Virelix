@@ -1,0 +1,16 @@
+Title: Term Frequency and Weighting
+Author: Virelix Editorial
+Category: Information Retrieval
+Tags: ranking, term frequency, tf-idf
+Date: 2024-01-22
+Source: Virelix sample corpus
+---
+Term frequency is the number of times a term occurs in a document. It is the simplest signal for ranking: a document that mentions "compiler" twelve times is probably more about compilers than one that mentions it once.
+
+Raw counts have weaknesses. Long documents contain more words and therefore accumulate higher counts by chance. A document that repeats a word fifty times is not fifty times more relevant than one that uses it once. Common remedies include logarithmic scaling, where the weight is one plus the logarithm of the count, and length normalization, which divides by the document length.
+
+Inverse document frequency complements term frequency. A term that appears in nearly every document, such as "the" or "data" in a database corpus, says little about relevance. Inverse document frequency is the logarithm of the total number of documents divided by the number of documents containing the term, so rare terms receive higher weights. Multiplying the two gives the familiar tf-idf weight.
+
+A ranking function scores each candidate document by summing the weights of the query terms it contains. Documents are then sorted by score in descending order. More sophisticated functions such as BM25 add saturation, so additional occurrences contribute less and less, and tunable parameters for length normalization.
+
+Whatever function is chosen, ranking should be explainable. Recording which terms matched and how much each contributed lets developers debug unexpected results and lets users understand why a document appeared.

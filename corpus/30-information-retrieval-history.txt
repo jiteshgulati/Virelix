@@ -1,0 +1,16 @@
+Title: A Short History of Information Retrieval
+Author: Virelix Editorial
+Category: Information Retrieval
+Tags: history, libraries, search engines
+Date: 2024-08-02
+Source: Virelix sample corpus
+---
+Information retrieval predates computers. Libraries organized knowledge with card catalogues, and back-of-book indexes and concordances listed where each word or topic appeared. A concordance of a major text was a laborious inverted index compiled by hand.
+
+In the 1950s and 1960s researchers began applying computers to document retrieval. Hans Peter Luhn at IBM proposed using word frequency to identify significant words and produced keyword-in-context indexes. Gerard Salton and his colleagues developed the SMART system at Cornell, introducing the vector space model, tf-idf weighting and rigorous experimental evaluation. The Cranfield experiments established the methodology of test collections with relevance judgments.
+
+The 1970s and 1980s brought probabilistic models, culminating in the Okapi BM25 ranking function. In 1992 the Text REtrieval Conference, known as TREC, began providing large shared test collections, which accelerated progress and made results comparable.
+
+The World Wide Web transformed the field. Early web search engines indexed millions of pages, and link analysis algorithms such as PageRank used the structure of hyperlinks to estimate page importance. Open-source libraries, notably Apache Lucene, made inverted-index search available to every developer, and systems such as Elasticsearch and Solr built distributed search servers on top of it.
+
+Today neural models and large language models add semantic matching, yet the inverted index remains central, often as the first stage that retrieves candidates for more expensive models to re-rank.

@@ -1,0 +1,16 @@
+Title: Web Accessibility Essentials
+Author: Virelix Editorial
+Category: Web Technologies
+Tags: accessibility, wcag, aria
+Date: 2024-05-10
+Source: Virelix sample corpus
+---
+Web accessibility means designing websites that people with disabilities can perceive, understand, navigate and interact with. The Web Content Accessibility Guidelines, published by the W3C, organize requirements under four principles: perceivable, operable, understandable and robust.
+
+Semantic HTML is the foundation. Native elements such as button, a, label, nav and main carry built-in roles and keyboard behaviour that assistive technologies understand. A clickable div looks like a button but cannot be reached with the Tab key or activated with Enter unless that behaviour is added manually.
+
+Every form control needs an accessible name, usually provided by a visible label associated with the input. Error messages should be connected to their fields so screen readers announce them. Images that convey information need text alternatives, while decorative images should be hidden from assistive technology.
+
+Keyboard users must be able to reach every interactive element in a logical order and must always see where focus is. Removing focus outlines without providing an alternative is one of the most common accessibility failures. Dialogs should move focus inside when they open, trap it while open and return it to the triggering control when they close.
+
+Colour contrast matters for people with low vision. WCAG level AA requires a contrast ratio of at least 4.5 to 1 for normal text. Motion can cause discomfort, so interfaces should respect the prefers-reduced-motion setting and avoid unnecessary animation.

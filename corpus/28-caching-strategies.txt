@@ -1,0 +1,16 @@
+Title: Caching Strategies
+Author: Virelix Editorial
+Category: Distributed Systems
+Tags: caching, lru, performance
+Date: 2024-07-19
+Source: Virelix sample corpus
+---
+A cache stores the results of expensive operations so that later requests can be served faster. Caches appear at every level of computing, from processor registers to content delivery networks.
+
+The key question is what to evict when the cache is full. Least recently used eviction discards the item that has gone longest without access, on the assumption that recent use predicts future use. Least frequently used eviction discards items with the fewest accesses. Time-based expiry removes entries after a fixed period, which bounds staleness.
+
+Write strategies determine how caches interact with the underlying store. Write-through caches update the store immediately on every write. Write-back caches delay updates, improving performance at the risk of losing data if the cache fails. Cache-aside, the most common pattern in web applications, has the application check the cache first and populate it after reading from the database.
+
+Invalidation is famously difficult. When the underlying data changes, cached copies must be updated or removed, or users will see stale results. Versioned keys, explicit invalidation events and short expiry times are common approaches.
+
+Search engines cache at several layers: query results for popular queries, postings lists for frequent terms and document snippets. Because query popularity follows a heavy-tailed distribution, even a modest cache can serve a large fraction of traffic. Measuring hit rate, the fraction of requests served from cache, shows whether a cache is effective.

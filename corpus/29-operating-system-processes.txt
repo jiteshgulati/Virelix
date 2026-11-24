@@ -1,0 +1,16 @@
+Title: Processes and Threads
+Author: Virelix Editorial
+Category: Operating Systems
+Tags: processes, threads, concurrency
+Date: 2024-07-26
+Source: Virelix sample corpus
+---
+A process is a running program with its own address space, open files and system resources. The operating system isolates processes from one another, so a crash in one does not corrupt the memory of another.
+
+A thread is a unit of execution within a process. Threads in the same process share memory, which makes communication between them cheap but introduces the risk of race conditions, where the outcome depends on the timing of concurrent operations. Locks, semaphores and other synchronization primitives coordinate access to shared data.
+
+The scheduler decides which thread runs on each processor core. Preemptive scheduling interrupts threads after a time slice so that no single thread monopolizes the processor. Context switches, which save one thread's state and restore another's, have a cost, so creating thousands of threads is rarely efficient.
+
+In CPython, the global interpreter lock historically allowed only one thread to execute Python bytecode at a time. Threads remain useful for input-output-bound work, such as a web server waiting on network sockets, because the lock is released during blocking operations. CPU-bound work traditionally used multiple processes instead, and recent Python versions offer an experimental free-threaded build.
+
+A threaded HTTP server handles each request in its own thread. Any shared data structure, such as an in-memory index or a session table, must therefore be protected so that concurrent requests cannot observe or produce inconsistent states.

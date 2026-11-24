@@ -1,0 +1,18 @@
+Title: The CAP Theorem
+Author: Virelix Editorial
+Category: Distributed Systems
+Tags: cap theorem, consistency, availability
+Date: 2024-04-19
+Source: Virelix sample corpus
+---
+The CAP theorem, conjectured by Eric Brewer and later proved by Seth Gilbert and Nancy Lynch, concerns three properties of distributed data stores: consistency, availability and partition tolerance.
+
+Consistency, in the CAP sense, means every read receives the most recent write or an error; it is equivalent to linearizability. Availability means every request to a non-failing node receives a response. Partition tolerance means the system continues operating when network failures prevent some nodes from communicating.
+
+The theorem states that when a network partition occurs, a system must choose between consistency and availability. If two groups of nodes cannot communicate, either some requests must be refused to avoid returning stale data, or requests are served and the groups may diverge.
+
+The popular summary "pick two of three" is misleading. Partitions are not optional in real networks, so the meaningful choice is how to behave during one. When the network is healthy, a well-designed system can provide both consistency and availability.
+
+The PACELC extension adds that even without partitions there is a trade-off between latency and consistency. Systems that replicate synchronously wait for acknowledgements, increasing latency, while asynchronous replication responds quickly but may serve stale reads.
+
+For search engines, slight staleness is often acceptable: a newly added document appearing a second later rarely matters, so many search clusters favour availability and low latency.

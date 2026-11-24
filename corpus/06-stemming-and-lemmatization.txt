@@ -1,0 +1,16 @@
+Title: Stemming and Lemmatization
+Author: Virelix Editorial
+Category: Natural Language Processing
+Tags: stemming, lemmatization, morphology
+Date: 2024-02-16
+Source: Virelix sample corpus
+---
+Words appear in many inflected forms. "Connect", "connected", "connecting" and "connection" share a common meaning, and a user searching for one may want documents containing the others.
+
+Stemming reduces words to a common root using heuristic suffix-stripping rules. The Porter stemmer, published in 1980, applies a sequence of rules in phases; it converts "connections" and "connected" to "connect". Stems are not always real words: "university" may become "univers". This does not matter for matching, because the same stemmer processes both documents and queries.
+
+Lemmatization uses vocabulary and morphological analysis to return the dictionary form of a word, called the lemma. It knows that "better" relates to "good" and that "ran" relates to "run". Lemmatization is more accurate than stemming but slower, and it often needs part-of-speech information.
+
+Both techniques increase recall, because more documents match a query, while sometimes reducing precision. Over-stemming merges unrelated words, such as "universe" and "university". Under-stemming fails to merge related forms, such as "absorb" and "absorption".
+
+The right choice depends on the collection and the users. Technical corpora with many exact identifiers often perform better with light normalization or none. Evaluation with relevance judgments is the only reliable way to decide whether stemming helps a particular search engine.

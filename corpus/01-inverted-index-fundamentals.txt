@@ -1,0 +1,16 @@
+Title: Inverted Index Fundamentals
+Author: Virelix Editorial
+Category: Information Retrieval
+Tags: indexing, postings, vocabulary
+Date: 2024-01-08
+Source: Virelix sample corpus
+---
+An inverted index maps every term in a collection to the list of documents that contain it. The name comes from inverting the natural document-to-words relationship: instead of asking which words appear in a document, the index answers which documents contain a word.
+
+The index has two parts. The vocabulary, sometimes called the dictionary or lexicon, stores each distinct term once. Each vocabulary entry points to a postings list. A posting records a document identifier and usually extra information such as the term frequency, the number of times the term occurs in that document, and optionally the positions where it occurs.
+
+Building an index starts with preprocessing. Documents are tokenized, lowercased and normalized so that "Index", "index" and "INDEX" become the same term. Each token is then appended to the postings list for its term. When a term appears several times in one document, the term frequency for that posting is incremented rather than creating a duplicate entry.
+
+Postings lists are typically kept sorted by document identifier. Sorted lists make intersection efficient: to answer a query containing two terms, a search engine walks both lists in parallel and keeps the identifiers present in both. This merge runs in time proportional to the combined list lengths.
+
+In Python an inverted index can be represented as a dictionary whose keys are terms and whose values are dictionaries from document identifiers to term frequencies. Sets are convenient for boolean operations, while dictionaries preserve the counts needed for ranking. Production systems compress postings with techniques such as delta encoding and variable-byte codes, but the conceptual structure is the same.

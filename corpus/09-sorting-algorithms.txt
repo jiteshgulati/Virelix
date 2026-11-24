@@ -1,0 +1,16 @@
+Title: Sorting Algorithms Compared
+Author: Virelix Editorial
+Category: Algorithms
+Tags: sorting, complexity, timsort
+Date: 2024-03-08
+Source: Virelix sample corpus
+---
+Sorting arranges items according to an ordering relation. It is one of the most studied problems in computer science because so many other algorithms, including search-result ranking, depend on it.
+
+Simple quadratic algorithms such as insertion sort and selection sort are easy to understand. Insertion sort is efficient for small or nearly sorted inputs and is used inside faster hybrid algorithms for that reason.
+
+Merge sort divides the input in half, sorts each half recursively and merges the results. It always runs in O(n log n) time and is stable, meaning equal elements keep their original relative order. Quicksort partitions around a pivot and sorts the partitions; it is usually faster in practice but has a quadratic worst case unless the pivot is chosen carefully. Heapsort guarantees O(n log n) time with constant extra memory but is not stable.
+
+Python's built-in sort uses Timsort, a hybrid of merge sort and insertion sort designed by Tim Peters. Timsort detects naturally ordered runs in real data and merges them, which makes it extremely fast on partially sorted input. It is stable, so sorting search results first by title and then by score keeps titles in order among results with equal scores.
+
+For ranking, a full sort is not always necessary. When only the top ten of a million candidates are needed, a heap of size ten processes the candidates in O(n log k) time, which is substantially faster than sorting everything.

@@ -1,0 +1,18 @@
+Title: Software Testing Strategies
+Author: Virelix Editorial
+Category: Software Engineering
+Tags: testing, unit tests, integration tests
+Date: 2024-07-05
+Source: Virelix sample corpus
+---
+Software testing provides evidence that code behaves as intended and protects against regressions when the code changes.
+
+Unit tests check small pieces of code, such as a single function, in isolation. They run quickly and pinpoint failures precisely. A tokenizer, for example, deserves unit tests for ordinary sentences, punctuation, mixed case, Unicode characters and empty input.
+
+Integration tests verify that components work together: that an HTTP endpoint correctly validates input, calls the storage layer and returns the expected response. End-to-end tests drive the complete application as a user would, often through a real browser using tools such as Playwright or Selenium. They catch problems that lower-level tests miss but are slower and more brittle.
+
+The testing pyramid recommends many unit tests, fewer integration tests and a small number of end-to-end tests. Edge cases deserve special attention: empty collections, maximum sizes, invalid encodings, missing files, concurrent access and permission boundaries.
+
+Tests should be deterministic and independent. Tests that depend on shared state, real time or network services fail intermittently and erode trust. Temporary directories, fixed clocks and synthetic data keep tests repeatable. Destructive operations such as deletions should only ever run against test data.
+
+Passing tests demonstrate the presence of tested behaviour, not the absence of bugs. Code review, static analysis and manual exploratory testing complement automated suites.

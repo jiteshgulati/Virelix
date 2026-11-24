@@ -1,0 +1,16 @@
+Title: Stop Words in Search Systems
+Author: Virelix Editorial
+Category: Natural Language Processing
+Tags: stop words, preprocessing, vocabulary
+Date: 2024-02-09
+Source: Virelix sample corpus
+---
+Stop words are very frequent words such as "the", "of", "and" and "is". They carry grammatical structure but little topical meaning, and they account for a large share of all tokens in ordinary text.
+
+Early search engines removed stop words to save space. Postings lists for the most common words are enormous, nearly as long as the collection itself, and storing them was expensive. Removing them also reduced the time spent processing queries.
+
+Modern systems are more cautious. Removing stop words breaks certain queries entirely. The phrase "to be or not to be" consists only of common words. Product names, band names and programming terms can collide with stop lists; "The Who" and the keyword "is" in some languages are examples. Compression has also made long postings lists much cheaper to store.
+
+A common compromise is to index every word but treat frequent words differently during ranking. Inverse document frequency automatically gives them low weight. Some engines drop them from free-text queries while keeping them for phrase queries.
+
+For a teaching search engine, stop-word removal is a useful experiment. Building the index with and without a stop list and comparing vocabulary size, index size and result quality shows clearly how a small preprocessing decision propagates through the whole system. The decision should be configurable and recorded alongside the index so that queries are processed in the same way.

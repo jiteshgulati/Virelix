@@ -1,0 +1,16 @@
+Title: Evaluating Search Quality
+Author: Virelix Editorial
+Category: Information Retrieval
+Tags: evaluation, precision, recall, mrr
+Date: 2024-06-14
+Source: Virelix sample corpus
+---
+Measuring search quality requires a test collection: a set of documents, a set of queries and relevance judgments stating which documents are relevant to each query. Without judgments, claims that a ranking change improves results are guesses.
+
+Precision is the fraction of retrieved documents that are relevant. Recall is the fraction of relevant documents that were retrieved. The two usually trade off: returning more documents tends to raise recall and lower precision.
+
+Because users rarely look past the first page, metrics often focus on the top of the ranking. Precision at k, written P@k, is the precision among the top k results; P@5 considers the first five. Recall at k is defined similarly.
+
+Mean reciprocal rank rewards placing the first relevant result high. For each query, the reciprocal rank is one divided by the position of the first relevant document, so a relevant result in position two scores 0.5. MRR averages this across queries. Normalized discounted cumulative gain handles graded relevance, giving more credit to highly relevant documents and discounting gains lower in the ranking.
+
+A sound evaluation fixes the collection, queries and judgments before comparing systems, so that changes are measured fairly. Reporting the number of queries and the variation between them helps readers judge whether a difference is meaningful. Edge cases, such as queries with no relevant documents, must be handled explicitly in the calculation.

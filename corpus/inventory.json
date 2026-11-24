@@ -1,0 +1,509 @@
+{
+  "counts": {
+    "discovered": 31,
+    "loaded": 31,
+    "skipped": 0,
+    "skipped_by_reason": {},
+    "total_bytes": 52041,
+    "with_warnings": 0
+  },
+  "documents": [
+    {
+      "doc_id": "doc-a32a84dde8",
+      "filename": "01-inverted-index-fundamentals.txt",
+      "title": "Inverted Index Fundamentals",
+      "category": "Information Retrieval",
+      "tags": [
+        "indexing",
+        "postings",
+        "vocabulary"
+      ],
+      "date": "2024-01-08",
+      "words": 265,
+      "tokens": 271,
+      "bytes": 1890,
+      "encoding": "utf-8"
+    },
+    {
+      "doc_id": "doc-2017f9339e",
+      "filename": "02-tokenization-and-normalization.txt",
+      "title": "Tokenization and Text Normalization",
+      "category": "Natural Language Processing",
+      "tags": [
+        "tokenization",
+        "preprocessing",
+        "normalization"
+      ],
+      "date": "2024-01-15",
+      "words": 225,
+      "tokens": 236,
+      "bytes": 1731,
+      "encoding": "utf-8"
+    },
+    {
+      "doc_id": "doc-071e684797",
+      "filename": "03-term-frequency-weighting.txt",
+      "title": "Term Frequency and Weighting",
+      "category": "Information Retrieval",
+      "tags": [
+        "ranking",
+        "term frequency",
+        "tf-idf"
+      ],
+      "date": "2024-01-22",
+      "words": 238,
+      "tokens": 243,
+      "bytes": 1722,
+      "encoding": "utf-8"
+    },
+    {
+      "doc_id": "doc-7f8df302f3",
+      "filename": "04-boolean-retrieval.txt",
+      "title": "Boolean Retrieval Models",
+      "category": "Information Retrieval",
+      "tags": [
+        "boolean queries",
+        "retrieval",
+        "operators"
+      ],
+      "date": "2024-02-02",
+      "words": 234,
+      "tokens": 237,
+      "bytes": 1693,
+      "encoding": "utf-8"
+    },
+    {
+      "doc_id": "doc-5e329f5763",
+      "filename": "05-stop-words.txt",
+      "title": "Stop Words in Search Systems",
+      "category": "Natural Language Processing",
+      "tags": [
+        "stop words",
+        "preprocessing",
+        "vocabulary"
+      ],
+      "date": "2024-02-09",
+      "words": 228,
+      "tokens": 235,
+      "bytes": 1631,
+      "encoding": "utf-8"
+    },
+    {
+      "doc_id": "doc-0ba2e6533d",
+      "filename": "06-stemming-and-lemmatization.txt",
+      "title": "Stemming and Lemmatization",
+      "category": "Natural Language Processing",
+      "tags": [
+        "stemming",
+        "lemmatization",
+        "morphology"
+      ],
+      "date": "2024-02-16",
+      "words": 203,
+      "tokens": 211,
+      "bytes": 1599,
+      "encoding": "utf-8"
+    },
+    {
+      "doc_id": "doc-ab043a060f",
+      "filename": "07-hash-tables.txt",
+      "title": "Hash Tables and Dictionaries",
+      "category": "Data Structures",
+      "tags": [
+        "hashing",
+        "dictionaries",
+        "python"
+      ],
+      "date": "2024-02-23",
+      "words": 251,
+      "tokens": 257,
+      "bytes": 1773,
+      "encoding": "utf-8"
+    },
+    {
+      "doc_id": "doc-00c2fac661",
+      "filename": "08-tries-and-prefix-search.txt",
+      "title": "Tries and Prefix Search",
+      "category": "Data Structures",
+      "tags": [
+        "tries",
+        "autocomplete",
+        "prefix"
+      ],
+      "date": "2024-03-01",
+      "words": 227,
+      "tokens": 235,
+      "bytes": 1543,
+      "encoding": "utf-8"
+    },
+    {
+      "doc_id": "doc-9992ad8fdf",
+      "filename": "09-sorting-algorithms.txt",
+      "title": "Sorting Algorithms Compared",
+      "category": "Algorithms",
+      "tags": [
+        "sorting",
+        "complexity",
+        "timsort"
+      ],
+      "date": "2024-03-08",
+      "words": 239,
+      "tokens": 247,
+      "bytes": 1615,
+      "encoding": "utf-8"
+    },
+    {
+      "doc_id": "doc-d08a547784",
+      "filename": "10-binary-search.txt",
+      "title": "Binary Search and Sorted Arrays",
+      "category": "Algorithms",
+      "tags": [
+        "binary search",
+        "sorted arrays",
+        "complexity"
+      ],
+      "date": "2024-03-15",
+      "words": 245,
+      "tokens": 256,
+      "bytes": 1721,
+      "encoding": "utf-8"
+    },
+    {
+      "doc_id": "doc-7b5817c507",
+      "filename": "11-relational-databases.txt",
+      "title": "Relational Databases and SQL",
+      "category": "Databases",
+      "tags": [
+        "sql",
+        "relational model",
+        "normalization"
+      ],
+      "date": "2024-03-22",
+      "words": 230,
+      "tokens": 237,
+      "bytes": 1679,
+      "encoding": "utf-8"
+    },
+    {
+      "doc_id": "doc-a08d2cf9f4",
+      "filename": "12-acid-transactions.txt",
+      "title": "ACID Transactions Explained",
+      "category": "Databases",
+      "tags": [
+        "transactions",
+        "acid",
+        "concurrency"
+      ],
+      "date": "2024-03-29",
+      "words": 223,
+      "tokens": 231,
+      "bytes": 1743,
+      "encoding": "utf-8"
+    },
+    {
+      "doc_id": "doc-20a302dbe8",
+      "filename": "13-nosql-data-models.txt",
+      "title": "NoSQL Data Models",
+      "category": "Databases",
+      "tags": [
+        "nosql",
+        "document stores",
+        "key-value"
+      ],
+      "date": "2024-04-05",
+      "words": 202,
+      "tokens": 214,
+      "bytes": 1615,
+      "encoding": "utf-8"
+    },
+    {
+      "doc_id": "doc-6cceafa930",
+      "filename": "14-distributed-systems-basics.txt",
+      "title": "Distributed Systems Basics",
+      "category": "Distributed Systems",
+      "tags": [
+        "distributed systems",
+        "replication",
+        "partitioning"
+      ],
+      "date": "2024-04-12",
+      "words": 228,
+      "tokens": 233,
+      "bytes": 1724,
+      "encoding": "utf-8"
+    },
+    {
+      "doc_id": "doc-53a4300108",
+      "filename": "15-cap-theorem.txt",
+      "title": "The CAP Theorem",
+      "category": "Distributed Systems",
+      "tags": [
+        "cap theorem",
+        "consistency",
+        "availability"
+      ],
+      "date": "2024-04-19",
+      "words": 221,
+      "tokens": 227,
+      "bytes": 1685,
+      "encoding": "utf-8"
+    },
+    {
+      "doc_id": "doc-d50a5a383f",
+      "filename": "16-http-protocol.txt",
+      "title": "How HTTP Works",
+      "category": "Web Technologies",
+      "tags": [
+        "http",
+        "web",
+        "protocols"
+      ],
+      "date": "2024-04-26",
+      "words": 227,
+      "tokens": 239,
+      "bytes": 1608,
+      "encoding": "utf-8"
+    },
+    {
+      "doc_id": "doc-9c908fb04d",
+      "filename": "17-rest-api-design.txt",
+      "title": "REST API Design Principles",
+      "category": "Web Technologies",
+      "tags": [
+        "rest",
+        "api design",
+        "json"
+      ],
+      "date": "2024-05-03",
+      "words": 222,
+      "tokens": 232,
+      "bytes": 1700,
+      "encoding": "utf-8"
+    },
+    {
+      "doc_id": "doc-ceec5f90f9",
+      "filename": "18-web-accessibility.txt",
+      "title": "Web Accessibility Essentials",
+      "category": "Web Technologies",
+      "tags": [
+        "accessibility",
+        "wcag",
+        "aria"
+      ],
+      "date": "2024-05-10",
+      "words": 228,
+      "tokens": 235,
+      "bytes": 1695,
+      "encoding": "utf-8"
+    },
+    {
+      "doc_id": "doc-40c3a23d55",
+      "filename": "19-password-hashing.txt",
+      "title": "Password Hashing and Storage",
+      "category": "Security",
+      "tags": [
+        "passwords",
+        "hashing",
+        "scrypt"
+      ],
+      "date": "2024-05-17",
+      "words": 220,
+      "tokens": 230,
+      "bytes": 1642,
+      "encoding": "utf-8"
+    },
+    {
+      "doc_id": "doc-e23d8b452a",
+      "filename": "20-session-security-and-csrf.txt",
+      "title": "Session Security and CSRF",
+      "category": "Security",
+      "tags": [
+        "sessions",
+        "csrf",
+        "cookies"
+      ],
+      "date": "2024-05-24",
+      "words": 226,
+      "tokens": 235,
+      "bytes": 1584,
+      "encoding": "utf-8"
+    },
+    {
+      "doc_id": "doc-94079805c5",
+      "filename": "21-access-control-models.txt",
+      "title": "Access Control Models",
+      "category": "Security",
+      "tags": [
+        "authorization",
+        "rbac",
+        "least privilege"
+      ],
+      "date": "2024-05-31",
+      "words": 230,
+      "tokens": 235,
+      "bytes": 1752,
+      "encoding": "utf-8"
+    },
+    {
+      "doc_id": "doc-ed46878e25",
+      "filename": "22-machine-learning-overview.txt",
+      "title": "Machine Learning Overview",
+      "category": "Machine Learning",
+      "tags": [
+        "machine learning",
+        "supervised learning",
+        "models"
+      ],
+      "date": "2024-06-07",
+      "words": 218,
+      "tokens": 226,
+      "bytes": 1750,
+      "encoding": "utf-8"
+    },
+    {
+      "doc_id": "doc-59ea5fa974",
+      "filename": "23-evaluation-metrics-for-search.txt",
+      "title": "Evaluating Search Quality",
+      "category": "Information Retrieval",
+      "tags": [
+        "evaluation",
+        "precision",
+        "recall",
+        "mrr"
+      ],
+      "date": "2024-06-14",
+      "words": 227,
+      "tokens": 233,
+      "bytes": 1644,
+      "encoding": "utf-8"
+    },
+    {
+      "doc_id": "doc-bcef24d2bc",
+      "filename": "24-zipfs-law.txt",
+      "title": "Zipf's Law in Text Collections",
+      "category": "Information Retrieval",
+      "tags": [
+        "zipf",
+        "word frequency",
+        "statistics"
+      ],
+      "date": "2024-06-21",
+      "words": 230,
+      "tokens": 238,
+      "bytes": 1590,
+      "encoding": "utf-8"
+    },
+    {
+      "doc_id": "doc-cd20bdef3d",
+      "filename": "25-version-control-with-git.txt",
+      "title": "Version Control with Git",
+      "category": "Software Engineering",
+      "tags": [
+        "git",
+        "version control",
+        "collaboration"
+      ],
+      "date": "2024-06-28",
+      "words": 223,
+      "tokens": 227,
+      "bytes": 1579,
+      "encoding": "utf-8"
+    },
+    {
+      "doc_id": "doc-f84c15cff0",
+      "filename": "26-software-testing.txt",
+      "title": "Software Testing Strategies",
+      "category": "Software Engineering",
+      "tags": [
+        "testing",
+        "unit tests",
+        "integration tests"
+      ],
+      "date": "2024-07-05",
+      "words": 217,
+      "tokens": 225,
+      "bytes": 1703,
+      "encoding": "utf-8"
+    },
+    {
+      "doc_id": "doc-2ae8eb4e4f",
+      "filename": "27-agile-and-scrum.txt",
+      "title": "Agile Development and Scrum",
+      "category": "Software Engineering",
+      "tags": [
+        "agile",
+        "scrum",
+        "project management"
+      ],
+      "date": "2024-07-12",
+      "words": 214,
+      "tokens": 223,
+      "bytes": 1672,
+      "encoding": "utf-8"
+    },
+    {
+      "doc_id": "doc-11790a73d6",
+      "filename": "28-caching-strategies.txt",
+      "title": "Caching Strategies",
+      "category": "Distributed Systems",
+      "tags": [
+        "caching",
+        "lru",
+        "performance"
+      ],
+      "date": "2024-07-19",
+      "words": 230,
+      "tokens": 237,
+      "bytes": 1693,
+      "encoding": "utf-8"
+    },
+    {
+      "doc_id": "doc-92580dd89c",
+      "filename": "29-operating-system-processes.txt",
+      "title": "Processes and Threads",
+      "category": "Operating Systems",
+      "tags": [
+        "processes",
+        "threads",
+        "concurrency"
+      ],
+      "date": "2024-07-26",
+      "words": 229,
+      "tokens": 237,
+      "bytes": 1678,
+      "encoding": "utf-8"
+    },
+    {
+      "doc_id": "doc-9150e1b0da",
+      "filename": "30-information-retrieval-history.txt",
+      "title": "A Short History of Information Retrieval",
+      "category": "Information Retrieval",
+      "tags": [
+        "history",
+        "libraries",
+        "search engines"
+      ],
+      "date": "2024-08-02",
+      "words": 223,
+      "tokens": 237,
+      "bytes": 1777,
+      "encoding": "utf-8"
+    },
+    {
+      "doc_id": "doc-9a1dcb0797",
+      "filename": "31-python-for-data-analysis.txt",
+      "title": "Python for Data Analysis",
+      "category": "Data Analysis",
+      "tags": [
+        "python",
+        "pandas",
+        "matplotlib"
+      ],
+      "date": "2024-08-09",
+      "words": 219,
+      "tokens": 226,
+      "bytes": 1610,
+      "encoding": "utf-8"
+    }
+  ]
+}

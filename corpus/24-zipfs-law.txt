@@ -1,0 +1,16 @@
+Title: Zipf's Law in Text Collections
+Author: Virelix Editorial
+Category: Information Retrieval
+Tags: zipf, word frequency, statistics
+Date: 2024-06-21
+Source: Virelix sample corpus
+---
+Zipf's law observes that in natural language the frequency of a word is roughly inversely proportional to its rank in the frequency table. The most common word occurs about twice as often as the second most common, three times as often as the third, and so on.
+
+Plotting rank against frequency on logarithmic axes produces an approximately straight line with a slope near minus one. This rank-frequency plot is a standard first analysis of any text collection, and it can be produced in a few lines with pandas and matplotlib.
+
+The law has practical consequences for search engines. A small number of very common words account for a large fraction of all tokens, which is why stop words dominate raw postings storage. At the other extreme, a long tail of rare words, many appearing only once, makes up a large fraction of the vocabulary. Words that occur exactly once are called hapax legomena.
+
+Heaps' law is a related observation about vocabulary growth: the number of distinct terms grows sub-linearly with collection size, roughly as a power of the number of tokens. New documents keep introducing new terms, but at a decreasing rate.
+
+These regularities help engineers estimate index sizes, choose compression schemes and design caching strategies. Caching postings lists for the most frequent query terms, which also follow a Zipf-like distribution, can serve a large share of traffic from memory.

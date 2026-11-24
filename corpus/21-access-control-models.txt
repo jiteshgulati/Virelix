@@ -1,0 +1,16 @@
+Title: Access Control Models
+Author: Virelix Editorial
+Category: Security
+Tags: authorization, rbac, least privilege
+Date: 2024-05-31
+Source: Virelix sample corpus
+---
+Authentication establishes who a user is; authorization decides what that user may do. Access control models describe how authorization decisions are made.
+
+Role-based access control assigns permissions to roles and roles to users. A content platform might define viewer, editor and administrator roles. Users inherit the permissions of their roles, which makes administration manageable: granting someone editor rights is a single change rather than dozens of individual permissions.
+
+Attribute-based access control evaluates policies over attributes of the user, the resource and the environment, such as department, document classification or time of day. It is more flexible but harder to reason about.
+
+The principle of least privilege states that every user and component should have only the permissions it needs. Privileged roles should be rare, and changes to them should be deliberate, audited and difficult to perform accidentally. Many systems require an existing privileged user to invite someone into a privileged role, with invitations that expire and work only once.
+
+Authorization must be enforced on the server for every request. Hiding a button in the interface is a usability decision, not a security control, because attackers can send requests directly. Common vulnerabilities include insecure direct object references, where changing an identifier in a URL exposes another user's data, and privilege escalation through parameters that set a user's role. Audit logs that record who performed privileged actions support accountability and incident investigation.

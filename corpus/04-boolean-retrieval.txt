@@ -1,0 +1,16 @@
+Title: Boolean Retrieval Models
+Author: Virelix Editorial
+Category: Information Retrieval
+Tags: boolean queries, retrieval, operators
+Date: 2024-02-02
+Source: Virelix sample corpus
+---
+The Boolean retrieval model treats a query as a logical expression over terms. A document either satisfies the expression or it does not; there is no notion of partial relevance.
+
+The three basic operators are AND, OR and NOT. A query such as "index AND compression" returns documents containing both terms. "index OR catalogue" returns documents containing either. "index NOT database" excludes documents mentioning the second term. With an inverted index these operators become set operations on postings lists: intersection, union and difference.
+
+Query optimization matters even in this simple model. When intersecting several lists, it is efficient to begin with the shortest list, because the intermediate result can never be larger than the smallest input. Document frequency, stored in the vocabulary, tells the engine which list is shortest without reading the lists.
+
+Phrase queries extend the model. To find the exact phrase "search engine", the engine must know not only that both terms occur in a document but that they occur next to each other in the right order. Positional postings, which store the offsets of every occurrence, make phrase matching possible.
+
+Boolean retrieval is precise and predictable, which is why legal and patent search professionals still rely on it. Its weakness is that results are unordered and users must craft queries carefully: too many AND operators return nothing, while too many OR operators return everything. Ranked retrieval was developed to address this.

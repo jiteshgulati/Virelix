@@ -1,0 +1,16 @@
+Title: ACID Transactions Explained
+Author: Virelix Editorial
+Category: Databases
+Tags: transactions, acid, concurrency
+Date: 2024-03-29
+Source: Virelix sample corpus
+---
+A transaction is a sequence of database operations treated as a single logical unit. Transferring money between accounts is the classic example: debiting one account and crediting another must both happen, or neither must happen.
+
+Atomicity guarantees all-or-nothing execution. If a failure occurs partway through, the database rolls back the completed steps. Consistency means a transaction moves the database from one valid state to another, preserving constraints such as foreign keys and uniqueness. Isolation ensures that concurrent transactions do not see each other's intermediate states. Durability guarantees that once a transaction commits, its effects survive crashes and power loss.
+
+Databases implement these properties with write-ahead logging, locking and multiversion concurrency control. A write-ahead log records changes before they are applied to data files, allowing recovery after a crash by replaying or undoing logged operations.
+
+Isolation comes in levels. Read committed prevents reading uncommitted data. Repeatable read prevents values from changing within a transaction. Serializable, the strongest level, guarantees results equivalent to running transactions one after another. Weaker levels permit anomalies such as lost updates and phantom reads but offer better concurrency.
+
+Even small applications that store data in files benefit from transactional thinking. Writing a new file and atomically renaming it over the old one ensures that readers see either the complete old version or the complete new version, never a half-written mixture.

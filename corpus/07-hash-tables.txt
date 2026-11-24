@@ -1,0 +1,16 @@
+Title: Hash Tables and Dictionaries
+Author: Virelix Editorial
+Category: Data Structures
+Tags: hashing, dictionaries, python
+Date: 2024-02-23
+Source: Virelix sample corpus
+---
+A hash table stores key-value pairs and supports insertion, lookup and deletion in expected constant time. It works by computing a hash function of the key, an integer that determines which slot of an underlying array holds the entry.
+
+Collisions occur when two keys hash to the same slot. Separate chaining resolves collisions by keeping a small list at each slot. Open addressing instead probes other slots, following a deterministic sequence, until it finds a free one. Python's dict uses open addressing with a perturbation scheme that mixes higher bits of the hash into the probe sequence.
+
+Performance depends on the load factor, the ratio of stored entries to available slots. As the table fills, collisions become more frequent and operations slow down. Implementations therefore resize the array, typically doubling it, and reinsert every entry when the load factor crosses a threshold. Resizing is expensive, but because it happens rarely the amortized cost of insertion remains constant.
+
+Since Python 3.7, dictionaries preserve insertion order as a language guarantee. Python sets are implemented with similar hash tables but store only keys, which makes them ideal for membership tests and for set algebra such as union and intersection.
+
+Hash tables are the natural foundation for an inverted index vocabulary. Looking up a term's postings list takes constant expected time regardless of how many distinct terms the collection contains. Their main limitation is that they do not keep keys sorted, so prefix and range queries need additional structures such as tries or sorted arrays.

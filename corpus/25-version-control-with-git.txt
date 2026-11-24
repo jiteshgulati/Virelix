@@ -1,0 +1,16 @@
+Title: Version Control with Git
+Author: Virelix Editorial
+Category: Software Engineering
+Tags: git, version control, collaboration
+Date: 2024-06-28
+Source: Virelix sample corpus
+---
+Version control systems record changes to files over time so that developers can review history, revert mistakes and collaborate without overwriting each other's work.
+
+Git is a distributed version control system created by Linus Torvalds in 2005. Every clone contains the full history of the repository. Git stores snapshots of the project as commits; each commit records the state of all tracked files, a message, an author and a reference to its parent commits.
+
+Branches are lightweight pointers to commits. Developers create a branch for each feature or fix, commit changes there and later merge the branch back into the main line. Merging combines histories, while rebasing replays commits onto a new base to produce a linear history. Conflicts arise when two branches change the same lines; Git marks them for manual resolution.
+
+A typical team workflow uses pull requests. A developer pushes a branch to a shared remote and opens a request for review. Teammates comment, automated tests run and the change is merged once approved.
+
+Good practices include writing small focused commits with clear messages, never committing secrets such as passwords or API keys, and using a .gitignore file to exclude generated files, local configuration and runtime data. If a secret is committed accidentally, removing it from the latest version is not enough; it remains in history and must be rotated.

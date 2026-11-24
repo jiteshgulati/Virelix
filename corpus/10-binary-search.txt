@@ -1,0 +1,16 @@
+Title: Binary Search and Sorted Arrays
+Author: Virelix Editorial
+Category: Algorithms
+Tags: binary search, sorted arrays, complexity
+Date: 2024-03-15
+Source: Virelix sample corpus
+---
+Binary search finds a target value in a sorted array by repeatedly halving the search interval. It compares the target with the middle element; if they differ, it discards the half that cannot contain the target. Each step eliminates half of the remaining candidates, so the search completes in O(log n) comparisons.
+
+The algorithm is famously easy to get wrong. Off-by-one errors in the interval bounds, infinite loops when the interval stops shrinking and integer overflow when computing the midpoint in fixed-width languages have all appeared in published implementations. Writing clear invariants, such as "the target, if present, lies in the half-open interval from low to high", helps avoid these bugs.
+
+Python provides the bisect module, which returns insertion points in a sorted list. bisect_left returns the first position where an item could be inserted while keeping the list sorted, which is also the position of the first equal element if one exists.
+
+Binary search applies to search engines in several places. A sorted vocabulary supports exact and prefix lookups by binary search. Skip pointers in postings lists allow an intersection algorithm to jump ahead instead of scanning every entry. Galloping or exponential search first finds a range by doubling the step size and then applies binary search within it, which is efficient when one list is much shorter than another.
+
+The general idea of halving a search space also underlies debugging techniques such as git bisect, which finds the commit that introduced a bug.

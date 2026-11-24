@@ -1,0 +1,16 @@
+Title: Distributed Systems Basics
+Author: Virelix Editorial
+Category: Distributed Systems
+Tags: distributed systems, replication, partitioning
+Date: 2024-04-12
+Source: Virelix sample corpus
+---
+A distributed system is a collection of independent computers that appears to its users as a single coherent system. Distribution provides scalability, fault tolerance and geographic reach, but it introduces problems that do not exist on a single machine.
+
+Networks are unreliable. Messages can be delayed, duplicated, reordered or lost, and a slow node is indistinguishable from a failed one. Clocks on different machines drift, so timestamps cannot reliably order events. Logical clocks, such as Lamport timestamps and vector clocks, provide ordering without synchronized physical time.
+
+Replication keeps copies of data on several nodes. Leader-based replication sends all writes through one node, which forwards them to followers. Multi-leader and leaderless replication accept writes at several nodes but must resolve conflicting updates.
+
+Partitioning, also called sharding, splits data across nodes so that each holds a subset. Search engines commonly partition by document: each shard indexes a portion of the collection, every query is sent to all shards, and the partial results are merged. Partitioning by term is an alternative in which each shard holds the complete postings lists for a subset of terms.
+
+Consensus algorithms such as Raft and Paxos allow nodes to agree on a value despite failures, which is essential for electing leaders and maintaining configuration. Designing distributed software requires assuming that every component can fail and making failure handling a normal path rather than an exception.
