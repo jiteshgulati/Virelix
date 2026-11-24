@@ -33,7 +33,7 @@ export default async function system(root, ctx) {
           <div><dt>Documents loaded</dt><dd class="tabular">${num(s.corpus.loaded)} of ${num(s.corpus.discovered)}</dd></div>
           <div><dt>Skipped</dt><dd class="tabular">${num(s.corpus.skipped)}</dd></div>
           <div><dt>Corpus size</dt><dd class="tabular">${bytes(s.corpus.total_bytes)}</dd></div>
-          <div><dt>Index</dt><dd>${{ current: "Current", stale: "Out of date", not_initialized: "Not initialised" }[s.index.state]}</dd></div></dl></section>
+          <div><dt>Index</dt><dd>${{ current: "Current", stale: "Out of date", unavailable: "Unavailable" }[s.index.state]}</dd></div></dl></section>
         <section class="vx-panel vx-panel-pad"><h2 class="section-title mb-2">Sessions &amp; email</h2><dl class="vx-ledger">
           <div><dt>Active sessions</dt><dd class="tabular">${num(s.sessions_active)}</dd></div>
           <div><dt>Email provider</dt><dd>${s.email.provider ? html`<span class="mono">${s.email.provider}</span> <span class="vx-badge warn">Not delivered</span>` : html`<span class="vx-badge danger">None configured</span>`}</dd></div></dl></section>

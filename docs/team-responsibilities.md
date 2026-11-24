@@ -60,6 +60,7 @@ changes; *Reviewer* reviews pull requests that touch it. Shared rows name a lead
 | `backend/services/mailer.py` | Development mailbox | J | C | Email integration point |
 | `backend/services/workspace.py` | History, saved items, collections, attachments, preferences | J | C | Privacy boundaries. C owns the matching interfaces |
 | `scripts/owner_recovery.py` | Manual Owner handover | J | C | Governance tooling |
+| `scripts/smoke_test.py` | Cross-platform start-up smoke test used by CI | J | C | Platform verification |
 
 ### Search engine and documents
 
@@ -67,9 +68,11 @@ changes; *Reviewer* reviews pull requests that touch it. Shared rows name a lead
 |---|---|---|---|---|
 | `backend/search/loader.py` | TXT discovery, decoding, metadata, stable IDs, load report | C | J | Document processing |
 | `backend/search/preprocess.py` | Normalisation and tokenisation | C | J | Text processing. J reviews because the index depends on it |
-| `backend/search/index.py` | Inverted index: postings, TF, positions, persistence | J | C | Core index and future ranking |
-| `backend/search/preview.py` | Current matching, sorting, excerpts and extractive overview | **Shared**: J leads matching, ordering and the move to ranked retrieval; C leads excerpts, snippets and the overview | both | Spans retrieval and result presentation |
-| `backend/services/corpus.py` | Shared-corpus lifecycle and index lifecycle | **Shared**: C leads load, upload, removal and validation; J leads index build, status and consistency | both | One service, two specialisations |
+| `backend/search/index.py` | Inverted index: postings, TF, positions, validation, persistence | J | C | Core index |
+| `backend/search/engine.py` | Query parsing, posting-list retrieval, TF scoring, deterministic ranking | J | C | Ranked retrieval |
+| `backend/search/overview.py` | Extractive overview over ranked hits; opening excerpts | **Shared**: J leads selection from ranked hits; C leads passage presentation | both | Spans retrieval and result presentation |
+| `backend/services/search.py` | Combines shared and private indexes; filters, sorts, paginates, times responses | **Shared**: J leads retrieval and privacy; C leads result fields used by the interface | both | The search contract |
+| `backend/services/corpus.py` | Shared-corpus lifecycle and index lifecycle | **Shared**: C leads load, upload, removal and validation; J leads index load, validation, atomic rebuild and status | both | One service, two specialisations |
 | `corpus/`, `corpus/inventory.json` | 31-document sample corpus | C | J | Corpus preparation |
 | `scripts/corpus_inventory.py` | Generates the corpus inventory | C | J | Corpus tooling |
 
@@ -108,7 +111,8 @@ changes; *Reviewer* reviews pull requests that touch it. Shared rows name a lead
 | Path | Purpose | Primary | Reviewer | Reason |
 |---|---|---|---|---|
 | `tests/backend/test_loader.py`, `test_preprocess.py` | Loader and preprocessing | C | J | Matches module ownership |
-| `tests/backend/test_index_preview.py` | Index and preview | **Shared** (J: index; C: preview) | both | Matches module ownership |
+| `tests/backend/test_index.py`, `test_search_engine.py` | Index, query processing, retrieval, ranking, index lifecycle | J | C | Matches module ownership |
+| `tests/backend/test_search_api.py` | Ranked search through the API; private-index isolation | **Shared** | both | Crosses services |
 | `tests/backend/test_api_auth.py`, `test_api_roles.py`, `test_governance_security.py` | Authentication, roles, governance, security, start-up | J | C | Security testing |
 | `tests/backend/test_api_workspace.py` | Search, workspace, admin corpus, static security | **Shared** | both | Crosses services |
 | `tests/backend/helpers.py` | Isolated test server fixtures | J | C | Backend test harness |
@@ -132,4 +136,4 @@ Measured by expected effort rather than file count:
 
 - **Jitesh** carries the deepest algorithmic and security work: ranked retrieval and index lifecycle, analytics APIs and benchmarking, plus most backend tests.
 - **Chaitain** carries the largest code surface (the whole frontend) and the document pipeline, snippet generation, the pandas/matplotlib analysis, search-quality evaluation and the browser test suite. This includes substantial Python work.
-- The integration layer (`app.py`, `preview.py`, `corpus.py`) and all documentation and submission work are shared, so both developers work on the core of the system.
+- The integration layer (`app.py`, `overview.py`, `services/search.py`, `corpus.py`) and all documentation and submission work are shared, so both developers work on the core of the system.

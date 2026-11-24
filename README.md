@@ -57,7 +57,7 @@ backend/app.py      route table · session resolution · CSRF and role checks ·
    ├── services/governance.py  Admin invitations, Admin removal, suspension
    ├── services/workspace.py   history, saved items, collections, attachments, preferences
    └── services/corpus.py      shared corpus and index lifecycle
-backend/search/     loader.py · preprocess.py · index.py · preview.py
+backend/search/     loader.py · preprocess.py · index.py · engine.py · overview.py
 backend/storage.py  atomic JSON stores in data/   ·   corpus/ sample documents
 ```
 

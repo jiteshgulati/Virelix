@@ -8,7 +8,7 @@ import { errorBlock, loading, pageHead } from "../../components/states.js";
 export const indexStateBadge = (state) => ({
   current: html`<span class="vx-badge ok"><span class="pip"></span>Current</span>`,
   stale: html`<span class="vx-badge warn"><span class="pip"></span>Out of date</span>`,
-  not_initialized: html`<span class="vx-badge"><span class="pip"></span>Not initialised</span>`,
+  unavailable: html`<span class="vx-badge danger"><span class="pip"></span>Unavailable</span>`,
 }[state] || html`<span class="vx-badge">${state}</span>`);
 
 export default async function overview(root, ctx) {
@@ -27,17 +27,17 @@ export default async function overview(root, ctx) {
       <div class="vx-figures">
         <div><div class="eyebrow">Shared documents</div><div class="figure">${num(c.loaded)}</div><div class="note">loaded of ${num(c.discovered)} files found · ${bytes(c.total_bytes)}</div></div>
         <div><div class="eyebrow">Skipped files</div><div class="figure">${num(c.skipped)}</div><div class="note">${c.skipped ? Object.entries(c.skipped_by_reason).map(([k, v]) => `${v} ${k.replace("_", " ")}`).join(", ") : "Every file loaded cleanly"}</div></div>
-        <div><div class="eyebrow">Vocabulary</div><div class="figure">${s ? num(s.vocabulary_size) : "—"}</div><div class="note">${s ? `distinct terms · ${num(s.total_tokens)} tokens` : "Initialise the index to measure"}</div></div>
+        <div><div class="eyebrow">Vocabulary</div><div class="figure">${s ? num(s.vocabulary_size) : "—"}</div><div class="note">${s ? `distinct terms · ${num(s.total_tokens)} tokens` : "Index unavailable"}</div></div>
         <div><div class="eyebrow">Accounts</div><div class="figure">${num(d.users.total)}</div><div class="note">${num(d.users.by_role.admin)} admin · ${num(d.users.by_status.suspended)} suspended · ${num(d.users.by_status.unverified)} unverified</div></div>
       </div>
       <div class="vx-split">
         <section class="vx-panel"><div class="vx-panel-head"><h2 class="section-title">Document index</h2>${indexStateBadge(d.index.state)}</div>
           <div class="vx-panel-body"><dl class="vx-ledger">
-            <div><dt>State</dt><dd>${{ current: "Built from the current corpus", stale: "Corpus changed since the last build", not_initialized: "Not built yet" }[d.index.state]}</dd></div>
+            <div><dt>State</dt><dd>${{ current: "Built from the current corpus", stale: "Last rebuild failed; the previous index is in use", unavailable: "Not available" }[d.index.state]}</dd></div>
             <div><dt>Indexed documents</dt><dd class="tabular">${s ? num(s.documents) : "—"} of ${num(d.index.corpus_documents)}</dd></div>
             <div><dt>Postings</dt><dd class="tabular">${s ? num(s.postings) : "—"}</dd></div>
             <div><dt>Last built</dt><dd>${s ? `${datetime(s.built_at)} · ${s.build_ms} ms` : "—"}</dd></div>
-            <div><dt>Ranked search</dt><dd><span class="vx-stamp">Not available</span> Results aren't ranked by relevance yet</dd></div>
+            <div><dt>Ranking</dt><dd>${d.index.retrieval_enabled ? "Term frequency (sum of query-term occurrences)" : "Unavailable until the index is built"}</dd></div>
           </dl><a class="vx-btn mt-3" href="/admin/index">${icon("index", "sm")} Manage index</a></div></section>
         <section class="vx-panel"><div class="vx-panel-head"><h2 class="section-title">Corpus health</h2></div>
           <div class="vx-panel-body vx-stack">

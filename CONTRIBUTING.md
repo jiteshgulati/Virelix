@@ -66,7 +66,7 @@ imperative, ≤ 72 characters, e.g. `feat(index): store term positions`,
 ## Pull requests
 
 1. Push your branch and open a pull request into `master` using the template.
-2. Request review from the other developer. `.github/CODEOWNERS` requests the right reviewer automatically. Changes to a shared module (`backend/app.py`, `backend/search/preview.py`, `backend/services/corpus.py`, `docs/api.md`) always need the other developer's approval.
+2. Request review from the other developer. `.github/CODEOWNERS` requests the right reviewer automatically. Changes to a shared module (`backend/app.py`, `backend/search/overview.py`, `backend/services/search.py`, `backend/services/corpus.py`, `docs/api.md`) always need the other developer's approval.
 3. Before requesting review, run both test suites and update docs and screenshots if behaviour or UI changed.
 4. Merge with **squash** or a normal merge commit after approval. Never force-push `master` or rewrite published history.
 5. Delete the branch after merging.
