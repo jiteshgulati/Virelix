@@ -98,6 +98,7 @@ test.describe("Accessibility", () => {
   test("keyboard: skip link, slash shortcut and dialog focus return", async ({ page }) => {
     await signInAs(page, unique("kbd"), "Kay Board");
     await page.goto("/collections");
+    await expect(page.locator("#main h1")).toBeAttached(); // the app has rendered its landmark
     await page.keyboard.press("Tab");
     await expect(page.getByRole("link", { name: "Skip to content" })).toBeFocused();
     await page.keyboard.press("Enter");

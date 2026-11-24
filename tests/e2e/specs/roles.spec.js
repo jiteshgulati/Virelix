@@ -99,19 +99,21 @@ test.describe("Roles and governance", () => {
 
   test("admins can suspend and reactivate a member; suspension ends the member's session", async ({ page, browser }) => {
     const memberEmail = unique("suspend");
+    const memberName = `Sam Suspended ${memberEmail.split("@")[0].slice(-4)}`; // unique per run
     const ctx = await browser.newContext();
     const member = await ctx.newPage();
-    await signInAs(member, memberEmail, "Sam Suspended");
+    await signInAs(member, memberEmail, memberName);
 
     await signInOwner(page);
     await page.goto("/admin/users");
-    await page.getByLabel("Search users").fill("Sam Suspended");
-    const row = page.locator("tbody tr", { hasText: "Sam Suspended" });
+    await page.getByLabel("Search users").fill(memberName);
+    const row = page.locator("tbody tr", { hasText: memberName });
     await expect(row).toHaveCount(1);
     await row.getByRole("button", { name: "Suspend", exact: true }).click();
     await page.getByRole("dialog").getByLabel(/Reason/).fill("Automated test");
     await page.getByRole("dialog").getByRole("button", { name: "Suspend account" }).click();
-    await expect(row.getByText("Suspended")).toBeVisible();
+    // exact: the member's own name ("Sam Suspended") must not satisfy this check
+    await expect(row.getByText("Suspended", { exact: true })).toBeVisible();
     // Owner account rows offer no suspend control.
     await page.getByLabel("Search users").fill(OWNER);
     await expect(page.locator("tbody tr", { hasText: OWNER }).getByRole("button", { name: "Suspend", exact: true })).toHaveCount(0);
@@ -123,10 +125,10 @@ test.describe("Roles and governance", () => {
     await member.getByRole("button", { name: "Sign in" }).click();
     await expect(member.getByText(/This account is suspended/)).toBeVisible();
 
-    await page.getByLabel("Search users").fill("Sam Suspended");
-    await page.locator("tbody tr", { hasText: "Sam Suspended" }).getByRole("button", { name: "Reactivate" }).click();
+    await page.getByLabel("Search users").fill(memberName);
+    await page.locator("tbody tr", { hasText: memberName }).getByRole("button", { name: "Reactivate" }).click();
     await page.getByRole("dialog").getByRole("button", { name: "Reactivate" }).click();
-    await expect(page.locator("tbody tr", { hasText: "Sam Suspended" }).getByText("Active")).toBeVisible();
+    await expect(page.locator("tbody tr", { hasText: memberName }).getByText("Active")).toBeVisible();
     await uiLogin(member, memberEmail);
     await ctx.close();
     await signOut(page);
