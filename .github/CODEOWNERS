@@ -1,0 +1,49 @@
+# Review routing for Virelix. Mirrors docs/team-responsibilities.md: the listed account is asked to
+# review changes to those paths. It records maintenance responsibility, not authorship.
+# GitHub applies the LAST matching rule, so shared paths come last.
+#   @jiteshgulati       Jitesh Gulati: Search Engine & Platform Engineering
+#   @chaitanya-gupta-07 Chaitain (Chaitanya) Gupta: Interface & Data Engineering
+
+# Default: either developer may review
+*                                   @jiteshgulati @chaitanya-gupta-07
+
+# Platform, security, governance, index (Jitesh)
+/run.py                             @jiteshgulati
+/backend/                           @jiteshgulati
+/scripts/owner_recovery.py          @jiteshgulati
+/tests/backend/                     @jiteshgulati
+/docs/architecture.md               @jiteshgulati
+/docs/api.md                        @jiteshgulati
+/docs/roles-and-onboarding.md       @jiteshgulati
+/.gitignore                         @jiteshgulati
+/.env.example                       @jiteshgulati
+/requirements.txt                   @jiteshgulati
+
+# Interface, documents, data and evaluation (Chaitain)
+/frontend/                          @chaitanya-gupta-07
+/backend/search/loader.py           @chaitanya-gupta-07
+/backend/search/preprocess.py       @chaitanya-gupta-07
+/corpus/                            @chaitanya-gupta-07
+/scripts/corpus_inventory.py        @chaitanya-gupta-07
+/analysis/                          @chaitanya-gupta-07
+/tests/backend/test_loader.py       @chaitanya-gupta-07
+/tests/backend/test_preprocess.py   @chaitanya-gupta-07
+/tests/e2e/                         @chaitanya-gupta-07
+/docs/design-system.md              @chaitanya-gupta-07
+/docs/corpus-inventory.md           @chaitanya-gupta-07
+/docs/screenshots/                  @chaitanya-gupta-07
+/README.md                          @chaitanya-gupta-07
+
+# Shared modules: changes need both developers
+/backend/app.py                     @jiteshgulati @chaitanya-gupta-07
+/backend/search/preview.py          @jiteshgulati @chaitanya-gupta-07
+/backend/services/corpus.py         @jiteshgulati @chaitanya-gupta-07
+/tests/backend/test_index_preview.py @jiteshgulati @chaitanya-gupta-07
+/tests/backend/test_api_workspace.py @jiteshgulati @chaitanya-gupta-07
+/docs/test-results.md               @jiteshgulati @chaitanya-gupta-07
+/docs/week1-checklist.md            @jiteshgulati @chaitanya-gupta-07
+/docs/week2-handoff.md              @jiteshgulati @chaitanya-gupta-07
+/docs/team-responsibilities.md      @jiteshgulati @chaitanya-gupta-07
+/CONTRIBUTING.md                    @jiteshgulati @chaitanya-gupta-07
+/THIRD_PARTY_NOTICES.md             @jiteshgulati @chaitanya-gupta-07
+/.github/                           @jiteshgulati @chaitanya-gupta-07
