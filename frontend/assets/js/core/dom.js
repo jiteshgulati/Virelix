@@ -58,6 +58,19 @@ export function highlight(text, terms) {
   return raw(out + esc(source.slice(last)));
 }
 
+/** Mark server-supplied ``[start, end)`` ranges. Every segment is escaped; only <mark> is added. */
+export function highlightRanges(text, ranges) {
+  const source = String(text ?? "");
+  let out = "";
+  let last = 0;
+  for (const [start, end] of ranges || []) {
+    if (!(Number.isInteger(start) && Number.isInteger(end)) || start < last || end <= start || end > source.length) continue;
+    out += esc(source.slice(last, start)) + `<mark class="vx-mark">${esc(source.slice(start, end))}</mark>`;
+    last = end;
+  }
+  return raw(out + esc(source.slice(last)));
+}
+
 export function announce(message) {
   const el = document.getElementById("sr-status");
   if (!el) return;
