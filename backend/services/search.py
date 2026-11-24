@@ -12,6 +12,7 @@ import time
 
 from backend.search import engine
 from backend.search.overview import lead_excerpt, overview
+from backend.search.snippets import make_snippet
 
 SOURCES = ("corpus", "attachments")
 
@@ -82,6 +83,7 @@ class SearchService:
             "term_frequencies": dict(hit.tf),
             "matched_terms": hit.matched,
             "missing_terms": hit.missing,
+            "snippet": make_snippet(doc.text, query.terms, phrase=query.tokens if query.mode == "phrase" else None),
             "excerpt": meta.get("summary") or lead_excerpt(doc.text),
             "excerpt_kind": "summary" if meta.get("summary") else "opening",
             "word_count": len(doc.text.split()),

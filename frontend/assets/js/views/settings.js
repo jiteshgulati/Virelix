@@ -232,12 +232,12 @@ function browserName(ua = "") {
 function searchPrefs(slot) {
   const p = prefs();
   mount(slot, html`<div class="vx-panel vx-panel-pad">
-    ${setting({ title: "Default matching", desc: "Used when you start a new search. You can still change it in the filter panel.", control: segment("default_mode", p.default_mode, [["all", "All terms"], ["any", "Any term"], ["phrase", "Exact phrase"]], "Default matching mode") })}
+    ${setting({ title: "Default matching", desc: "Used when you start a new search. You can still change it in the filter panel.", control: segment("default_mode", p.default_mode, [["any", "Any term"], ["all", "All terms"], ["phrase", "Exact phrase"]], "Default matching mode") })}
     ${setting({ title: "Results per page", control: segment("per_page", p.per_page, [[10, "10"], [20, "20"], [30, "30"]], "Results per page") })}
     ${setting({ title: "Default sources", desc: "Which collections a new search looks in.", control: html`<div class="vx-stack gap-2">
       <label class="vx-check"><input type="checkbox" name="default_sources" value="corpus" data-group ${p.default_sources.includes("corpus") ? "checked" : ""}> Shared corpus</label>
       <label class="vx-check"><input type="checkbox" name="default_sources" value="attachments" data-group ${p.default_sources.includes("attachments") ? "checked" : ""}> My attachments</label></div>` })}
-    <div class="vx-notice mt-4">${icon("info")}<div>Results aren't ranked by relevance yet, so there are no ranking options.</div></div>
+    <div class="vx-notice mt-4">${icon("info")}<div>Results are ranked by term frequency: how many times your words occur in each document. You can sort by title or date from the results page.</div></div>
   </div>`);
   bindPrefInputs(slot, { per_page: (v) => parseInt(v, 10) });
 }

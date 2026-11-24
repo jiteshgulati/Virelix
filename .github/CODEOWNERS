@@ -24,6 +24,8 @@
 /frontend/                          @chaitanya-gupta-07
 /backend/search/loader.py           @chaitanya-gupta-07
 /backend/search/preprocess.py       @chaitanya-gupta-07
+/backend/search/snippets.py         @chaitanya-gupta-07
+/tests/backend/test_snippets.py     @chaitanya-gupta-07
 /corpus/                            @chaitanya-gupta-07
 /scripts/corpus_inventory.py        @chaitanya-gupta-07
 /analysis/                          @chaitanya-gupta-07
@@ -45,6 +47,8 @@
 /docs/test-results.md               @jiteshgulati @chaitanya-gupta-07
 /docs/week1-checklist.md            @jiteshgulati @chaitanya-gupta-07
 /docs/week2-handoff.md              @jiteshgulati @chaitanya-gupta-07
+/docs/week2-checklist.md            @jiteshgulati @chaitanya-gupta-07
+/docs/week3-handoff.md              @jiteshgulati @chaitanya-gupta-07
 /docs/team-responsibilities.md      @jiteshgulati @chaitanya-gupta-07
 /CONTRIBUTING.md                    @jiteshgulati @chaitanya-gupta-07
 /THIRD_PARTY_NOTICES.md             @jiteshgulati @chaitanya-gupta-07

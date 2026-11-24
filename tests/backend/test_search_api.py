@@ -44,6 +44,15 @@ class RankedSearchApiTests(ServerTestCase):
         self.assertIsInstance(r["response_time_ms"], float)
         self.assertGreaterEqual(r["response_time_ms"], 0)
 
+    def test_results_carry_structured_snippets(self):
+        top = self.search(q="python programming")["results"][0]
+        snip = top["snippet"]
+        self.assertEqual(snip["kind"], "match")
+        marked = [snip["text"][a:b].casefold() for a, b in snip["highlights"]]
+        self.assertEqual(marked, ["python", "python", "python", "programming", "programming"])
+        phrase = self.search(q="python programming", mode="phrase")["results"][0]["snippet"]
+        self.assertEqual([phrase["text"][a:b] for a, b in phrase["highlights"]], ["Python programming"])
+
     def test_modes(self):
         self.assertEqual([x["score"] for x in self.search(q="python programming", mode="all")["results"]], [5, 2])
         self.assertEqual([x["title"] for x in self.search(q="python programming", mode="phrase")["results"]],
