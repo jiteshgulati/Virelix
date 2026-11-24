@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en" data-theme="light" data-accent="viridian" data-text="md" data-density="comfortable" data-sidebar="expanded" data-motion="system">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="Virelix — search and research across a shared document corpus and your private files.">
+  <title>Virelix</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <script src="/assets/js/boot-theme.js"></script>
+  <link rel="preload" href="/assets/fonts/geist-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/newsreader-latin-opsz-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/assets/vendor/bootstrap/bootstrap.min.css">
+  <link rel="stylesheet" href="/assets/css/tokens.css">
+  <link rel="stylesheet" href="/assets/css/virelix.css">
+</head>
+<body>
+  <a class="vx-skip" href="#main">Skip to content</a>
+  <div id="root" aria-live="off">
+    <div class="vx-auth-main vx-boot">
+      <noscript><p>Virelix needs JavaScript enabled in your browser.</p></noscript>
+    </div>
+  </div>
+  <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toasts" aria-live="polite" aria-atomic="false"></div>
+  <div id="sr-status" class="visually-hidden" role="status" aria-live="polite"></div>
+  <script src="/assets/vendor/bootstrap/bootstrap.bundle.min.js"></script>
+  <script type="module" src="/assets/js/main.js"></script>
+</body>
+</html>
