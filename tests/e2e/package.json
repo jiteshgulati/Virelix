@@ -1,0 +1,13 @@
+{
+  "name": "virelix-e2e",
+  "private": true,
+  "description": "Development-only browser tests for Virelix. The shipped frontend has no build step or npm dependencies.",
+  "scripts": {
+    "test": "playwright test",
+    "screenshots": "playwright test screenshots.spec.js"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
+    "@playwright/test": "1.65.1"
+  }
+}
