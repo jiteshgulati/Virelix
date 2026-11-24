@@ -12,13 +12,12 @@ from urllib.parse import unquote, urlsplit
 
 from backend import __version__
 from backend import security as sec
-from backend.search.preview import QueryError
-from backend.search.preview import overview as build_overview
-from backend.search.preview import search as run_search
+from backend.search.engine import QueryError
 from backend.services.auth import DEFAULT_PREFS, AuthService
 from backend.services.common import Auditor, Notifier, forbidden, has_role, iso, now, public_user
 from backend.services.corpus import CorpusService
 from backend.services.governance import Governance
+from backend.services.search import SearchService
 from backend.services.mailer import DevMailbox
 from backend.services.workspace import WorkspaceService
 from backend.storage import Database
@@ -58,6 +57,7 @@ class App:
         self.gov = Governance(cfg, self.db, self.auth, self.mailer, self.notifier, self.audit)
         self.corpus = CorpusService(cfg, self.db, self.audit)
         self.ws = WorkspaceService(cfg, self.db, self.corpus)
+        self.search = SearchService(self.corpus, self.ws)
         self.owner_state = self.auth.reconcile_owner()
         self.router = Router()
         self._routes()
@@ -336,14 +336,6 @@ class App:
         return {"ok": True}
 
     # ------------------------------------------------------- search/document
-    def _candidates(self, ctx: Ctx, sources: list[str]):
-        out = []
-        if "corpus" in sources:
-            out += self.corpus.candidates()
-        if "attachments" in sources:
-            out += self.ws.attachment_candidates(ctx.uid)
-        return out
-
     @staticmethod
     def _list_param(value: str | None, allowed: set | None = None) -> list[str]:
         items = [v.strip() for v in (value or "").split(",") if v.strip()]
@@ -357,12 +349,12 @@ class App:
         sources = self._list_param(q.get("sources"), {"corpus", "attachments"}) or prefs["default_sources"]
         categories = self._list_param(q.get("categories"))
         mode = q.get("mode") or prefs["default_mode"]
-        sort = q.get("sort") or "coverage"
+        sort = q.get("sort") or "relevance"
         per_page = ctx.req.int_query("per_page", prefs["per_page"], 5, 50)
         page = ctx.req.int_query("page", 1, 1, 10000)
         try:
-            result = run_search(self._candidates(ctx, sources), q.get("q", ""), mode=mode, sort=sort,
-                                page=page, per_page=per_page, categories=categories)
+            result = self.search.search(ctx.uid, q.get("q", ""), mode=mode, sources=sources, categories=categories,
+                                        sort=sort, page=page, per_page=per_page)
         except QueryError as exc:
             raise bad_request(str(exc), "invalid_query")
         saved = self.ws.saved_doc_ids(ctx.uid)
@@ -371,7 +363,7 @@ class App:
         result["sources"] = sources
         result["categories"] = categories
         if q.get("record") == "1":
-            self.ws.record_search(ctx.user, {"query": result["query"], "mode": mode, "sort": sort, "sources": sources,
+            self.ws.record_search(ctx.user, {"query": result["query"], "mode": result["mode"], "sort": result["sort"], "sources": sources,
                                              "categories": categories, "category_tab": (q.get("tab") or "all")[:20],
                                              "result_count": result["total"]})
         return result
@@ -379,13 +371,13 @@ class App:
     def h_overview(self, ctx):
         q = ctx.req.query
         try:
-            return build_overview(self.corpus.candidates(), q.get("q", ""), mode=q.get("mode") or "all")
+            return self.search.overview(q.get("q", ""), q.get("mode") or "any")
         except QueryError as exc:
             raise bad_request(str(exc), "invalid_query")
 
     def h_facets(self, ctx):
         return {"categories": self.corpus.categories(),
-                "sources": [{"id": "corpus", "label": "Shared corpus", "count": len(self.corpus.candidates())},
+                "sources": [{"id": "corpus", "label": "Shared corpus", "count": self.corpus.document_count()},
                             {"id": "attachments", "label": "My attachments", "count": len(self.ws.list_attachments(ctx.uid))}],
                 "document_types": [{"id": "txt", "label": "Plain text (.txt)", "supported": True},
                                    {"id": "pdf", "label": "PDF", "supported": False},
@@ -441,7 +433,13 @@ class App:
         return json_response(self.ws.save_document(ctx.uid, body.get("doc_id"), body.get("query") or ""), 201)
 
     def h_save_overview(self, ctx):
-        return json_response(self.ws.save_overview(ctx.uid, ctx.req.json()), 201)
+        body = ctx.req.json()
+        query, mode = body.get("query") or "", body.get("mode") or "any"
+        try:
+            result = self.search.overview(query, mode)      # recomputed server-side; client passages ignored
+        except QueryError as exc:
+            raise bad_request(str(exc))
+        return json_response(self.ws.save_overview(ctx.uid, query, result["mode"], result), 201)
 
     def h_unsave(self, ctx):
         self.ws.unsave(ctx.uid, saved_id=ctx.params["sid"])
@@ -632,11 +630,10 @@ class App:
                 "email_delivery": "development mailbox (not delivered)" if self.cfg.dev_mailbox else "not configured",
             },
             "capabilities": [
-                {"name": "Document search preview", "available": True,
-                 "detail": "Every document is checked for the query words; results aren't ranked by relevance."},
+                {"name": "Ranked search", "available": True,
+                 "detail": "Inverted-index retrieval ranked by term frequency (sum of query-term occurrences)."},
                 {"name": "Extractive overview", "available": True, "detail": "Quotes sentences from matching documents with references."},
-                {"name": "Document index", "available": True, "detail": "Built and inspected by administrators."},
-                {"name": "Ranked search", "available": False, "detail": "Not available yet."},
+                {"name": "Document index", "available": True, "detail": "Built automatically, rebuilt on every corpus change, inspectable by administrators."},
                 {"name": "Search analytics", "available": False, "detail": "No aggregate query data is collected."},
                 {"name": "Search evaluation", "available": False, "detail": "No relevance judgments exist."},
                 {"name": "Email delivery", "available": False,

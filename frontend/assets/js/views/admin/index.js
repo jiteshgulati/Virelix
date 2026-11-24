@@ -10,9 +10,9 @@ export default async function indexView(root, ctx) {
   root.classList.add("wide");
   const st = { tab: "vocabulary", q: "", sort: "term", page: 1, term: null };
   mount(root, html`${pageHead({ eyebrow: "Administration", title: "Index management",
-    lede: "Inspect the inverted index built from the shared corpus: vocabulary, document frequencies, and postings with term frequencies and positions.",
+    lede: "The inverted index behind search: vocabulary, document frequencies, and postings with term frequencies and positions.",
     actions: html`<button type="button" class="vx-btn primary" data-build>${icon("refresh", "sm")} Rebuild index</button>` })}
-    <div class="vx-notice mb-5">${icon("info")}<div><strong>Inspection only.</strong> Search results don't use this index for ranking yet. Rebuild it after adding or removing documents.</div></div>
+    <div class="vx-notice mb-5">${icon("info")}<div><strong>In use by search.</strong> Searches read candidate documents from these postings and rank them by term frequency. The index is rebuilt automatically whenever documents are added or removed. Members' private attachments are indexed separately and never appear here.</div></div>
     <div data-status>${loading(4)}</div>
     <div class="vx-tabs mt-5 mb-4" role="tablist" aria-label="Index views" data-tabs>
       <button type="button" class="vx-tab" role="tab" aria-selected="true" data-tab="vocabulary">${icon("index", "sm")} Vocabulary</button>
@@ -26,19 +26,19 @@ export default async function indexView(root, ctx) {
   const renderStatus = () => {
     const s = info.stats;
     mount(status, html`${info.error ? html`<div class="vx-notice danger mb-3">${icon("alert")}<div>${info.error}</div></div>` : ""}
-      ${info.state === "stale" ? html`<div class="vx-notice warn mb-3">${icon("alert")}<div><strong>Out of date.</strong> Documents were added, changed or removed since the last build. Rebuild to bring the index in line with the corpus.</div></div>` : ""}
+      ${info.state === "stale" ? html`<div class="vx-notice warn mb-3">${icon("alert")}<div><strong>Out of date.</strong> The last automatic rebuild didn't complete, so search is still using the previous index. Rebuild to bring it in line with the corpus.</div></div>` : ""}
       <div class="vx-figures">
-        <div><div class="eyebrow">State</div><div class="mt-1">${indexStateBadge(info.state)}</div><div class="note">${s ? `Built ${datetime(s.built_at)} in ${s.build_ms} ms` : "Never built"}</div></div>
+        <div><div class="eyebrow">State</div><div class="mt-1">${indexStateBadge(info.state)}</div><div class="note">${s ? `Built ${datetime(s.built_at)} in ${s.build_ms} ms` : "Not available"}</div></div>
         <div><div class="eyebrow">Documents</div><div class="figure">${s ? num(s.documents) : "—"}</div><div class="note">of ${num(info.corpus_documents)} in the corpus</div></div>
         <div><div class="eyebrow">Vocabulary</div><div class="figure">${s ? num(s.vocabulary_size) : "—"}</div><div class="note">${s ? `${num(s.hapax_terms)} appear exactly once` : "distinct terms"}</div></div>
         <div><div class="eyebrow">Postings</div><div class="figure">${s ? num(s.postings) : "—"}</div><div class="note">${s ? `${num(s.total_tokens)} tokens · avg ${s.average_document_length} per doc` : "term–document pairs"}</div></div>
       </div>
-      ${s ? html`<p class="meta mt-3">Stop-word removal: <strong>${s.settings.remove_stopwords ? "on" : "off"}</strong> · format v${s.format_version} · title and body tokens are both indexed.</p>` : ""}`);
+      ${s ? html`<p class="meta mt-3">Ranking: <strong>term frequency</strong> · build ${num(info.generation || 1)}${info.last_event?.reason ? ` (${info.last_event.event === "loaded" ? "loaded at start-up" : `rebuilt: ${info.last_event.reason}`})` : ""} · format v${s.format_version} · title and body tokens indexed, stop words kept.</p>` : ""}`);
   };
 
   const renderPane = async () => {
     if (!info.stats) {
-      mount(pane, empty({ glyph: "∅", title: "Nothing to inspect yet", body: "Build the index to populate the vocabulary and postings from the shared corpus.",
+      mount(pane, empty({ glyph: "∅", title: "The index isn't available", body: "Build the index to populate the vocabulary and postings from the shared corpus.",
         actions: html`<button type="button" class="vx-btn primary" data-build-empty>${icon("refresh", "sm")} Build index</button>` }));
       return;
     }
@@ -111,22 +111,20 @@ export default async function indexView(root, ctx) {
   };
 
   const build = async (btn) => {
-    const removeStop = await openStopwordChoice();
-    if (removeStop === null) return;
+    if (!(await confirmRebuild())) return;
     setBusy(btn, true);
     try {
-      info = await post("/api/admin/index/rebuild", { remove_stopwords: removeStop });
+      info = await post("/api/admin/index/rebuild", {});
       toast(`Index built: ${num(info.stats.vocabulary_size)} terms from ${plural(info.stats.documents, "document")} in ${info.stats.build_ms} ms.`);
       renderStatus(); st.page = 1; renderPane();
     } catch (err) { toastError(err); }
     finally { setBusy(btn, false); }
   };
 
-  async function openStopwordChoice() {
-    const ok = await confirmDialog({ title: info?.stats ? "Rebuild the document index?" : "Build the document index?", tone: "primary", confirmLabel: info?.stats ? "Rebuild" : "Build",
-      message: "Every document in the shared corpus is tokenised and its postings recorded. The previous build is replaced.",
-      detail: "Stop words such as “the” and “of” are kept in the index." });
-    return ok ? false : null;
+  function confirmRebuild() {
+    return confirmDialog({ title: info?.stats ? "Rebuild the document index?" : "Build the document index?", tone: "primary", confirmLabel: info?.stats ? "Rebuild" : "Build",
+      message: "Every document in the shared corpus is tokenised and its postings recorded. The new index is checked, saved, and only then replaces the current one, so search keeps working throughout.",
+      detail: "Stop words such as “the” and “of” are kept, so every query word can be matched." });
   }
 
   const offs = [

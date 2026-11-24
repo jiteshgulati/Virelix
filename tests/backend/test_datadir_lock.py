@@ -69,6 +69,7 @@ class DataDirLockTests(unittest.TestCase):
         finally:
             proc.kill()                           # simulate a crash: no clean release
             proc.wait(timeout=10)
+            proc.stdout.close()
         DataDirLock(self.path).acquire().release()  # the OS freed the lock; no manual cleanup
 
     def test_no_process_signalling_in_runtime_code(self):

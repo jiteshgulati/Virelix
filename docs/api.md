@@ -40,8 +40,8 @@ Base path `/api`. JSON in, JSON out (`Content-Type: application/json`). Uploads 
 
 | Method & path | Auth | Notes |
 |---|---|---|
-| `GET /search` | user | `q` (≤300 chars), `mode` (all·any·phrase), `sort` (coverage·title_asc·title_desc·date_desc·date_asc), `page`, `per_page` (5–50), `sources` (corpus,attachments), `categories` (comma list), `record=1` adds to history. Returns `{query, terms, total, page, pages, per_page, searched, terms_without_matches, method, results[]}`. Each result: `doc_id, title, source, filename, category, author, date, tags, excerpt, excerpt_kind, matched_terms, missing_terms, word_count, saved`. **No score field.** |
-| `GET /search/overview` | user | `q`, `mode`. Returns `{kind: "extractive_preview", passages[{text, doc_id, title, sentence_index, matched_terms}], references[], matching_documents, method}` |
+| `GET /search` | user | `q` (≤300 chars, ≤24 distinct terms), `mode` (any·all·phrase; default is the member's saved preference, `any` for new accounts), `sort` (relevance·title_asc·title_desc·date_desc·date_asc; default `relevance`; the earlier name `coverage` is accepted as `relevance`), `page`, `per_page` (5–50), `sources` (corpus,attachments), `categories` (comma list), `record=1` adds to history. Returns `{query, terms, mode, sort, total, page, pages, per_page, searched, terms_without_matches, ranking: "term_frequency", method, response_time_ms, results[]}`. Each result: `doc_id, title, source (corpus·attachment), filename, category, author, date, tags, score, term_frequencies {term: tf}, matched_terms, missing_terms, excerpt, excerpt_kind, word_count, saved`. See *Ranking* below |
+| `GET /search/overview` | user | `q`, `mode` (default `any`). Passages come from the highest-ranked shared-corpus documents. Returns `{kind: "extractive_preview", passages[{text, doc_id, title, sentence_index, matched_terms}], references[], matching_documents, method}` |
 | `GET /search/facets` | user | Sources with counts, categories with counts, document types with `supported` |
 | `GET /documents/{doc_id}` | user | Full text and metadata, `saved`, `collections` (IDs containing it) · `404 document_not_found` |
 
@@ -73,9 +73,9 @@ Base path `/api`. JSON in, JSON out (`Content-Type: application/json`). Uploads 
 | `POST /admin/documents/remove {doc_ids[]}` | All-or-nothing; files move to `data/removed_documents/` |
 | `GET /admin/documents/{doc_id}` | Metadata and full text |
 | `POST /admin/corpus/reload` | Re-scan the corpus folder |
-| `GET /admin/index` | `{state: not_initialized·current·stale, stats, corpus_documents, retrieval_enabled: false, note}` |
-| `POST /admin/index/rebuild {remove_stopwords?}` | Build the foundation from the corpus |
-| `GET /admin/index/vocabulary` | `q`, `sort` (term·df·cf), `page`, `per_page` |
+| `GET /admin/index` | `{state: current·stale·unavailable, error, stats, generation, last_event {event: loaded·rebuilt, reason}, corpus_documents, retrieval_enabled, ranking: "term_frequency", note}`. `stale` only appears while a failed rebuild left the previous index in service |
+| `POST /admin/index/rebuild` | Rebuild, validate and atomically replace the shared index (the generation increases). `remove_stopwords: true` → `400 unsupported_option`. `500 index_rebuild_failed` keeps the previous index |
+| `GET /admin/index/vocabulary` | `q`, `sort` (term·df·cf), `page`, `per_page`. Shared index only; private attachment terms never appear · `503 index_unavailable` |
 | `GET /admin/index/postings?term=` | `{term, df, cf, postings[{doc_id, title, tf, positions, positions_total}]}` |
 | `GET /admin/index/documents` | Per-document token length and unique terms |
 | `GET /admin/users` | `q`, `role`, `status` (active·suspended·unverified) |
@@ -100,3 +100,20 @@ Base path `/api`. JSON in, JSON out (`Content-Type: application/json`). Uploads 
 | Method & path | Notes |
 |---|---|
 | `GET /dev/mailbox` · `DELETE /dev/mailbox` | Requires development mode (otherwise `404`), a loopback socket address (otherwise `403`; `Host`/`X-Forwarded-*` ignored) **and** header `X-Dev-Mailbox-Key` matching the key printed at start-up (otherwise `403 dev_key_required`) |
+
+## Ranking
+
+`score` is `Σ tf(t, d)` over the query's distinct normalised terms: the number of times those
+words occur in the document's title and body. It isn't a percentage, probability or confidence.
+`term_frequencies` shows the parts of the sum, so `score == sum(term_frequencies.values())` for
+every result. Results are ordered by score (descending), then case-folded title, then `doc_id`.
+Candidates come from posting lists (union for `any`, intersection for `all`, intersection plus
+a positional check for `phrase`). Filtering and sorting apply to the full result set before
+pagination.
+
+`response_time_ms` is measured with a monotonic clock from query parsing to the finished
+response body (not including network time).
+
+Shared-corpus results and the caller's own attachments (`source: "attachment"`) are ranked
+together. Attachments are indexed per member, in memory, and are never visible to anyone else,
+including Admins and the Owner.

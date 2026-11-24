@@ -1,4 +1,17 @@
-"""Shared document corpus and its inverted index."""
+"""Shared document corpus and its inverted index.
+
+Index lifecycle
+---------------
+* Start-up: load ``data/index/shared-index.json``. If it's missing, unreadable,
+  an older format, internally inconsistent or built from a different corpus
+  (signature mismatch), rebuild it from the loaded documents.
+* Corpus changes (upload, removal, reload from disk): the index is rebuilt
+  immediately, so search always reflects the current corpus.
+* Rebuilds build a complete new index, validate it, write it atomically and only
+  then swap it in. If a rebuild fails, the previous index stays in service.
+* Searches read an immutable snapshot (index and documents together) and never
+  trigger a rebuild.
+"""
 
 from __future__ import annotations
 
@@ -9,11 +22,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from backend import security as sec
-from backend.search.index import InvertedIndex, initialize_foundation
+from backend.search.index import InvertedIndex, build_index
 from backend.search.loader import (SUPPORTED_EXTENSIONS, LoaderError, decode_bytes, load_corpus,
                                    parse_document_text)
 from backend.search.preprocess import normalize_text
-from backend.search.preview import Candidate
 from backend.services.common import Auditor, conflict, not_found
 from backend.storage import atomic_write_bytes
 from backend.web import HttpError, bad_request
@@ -29,13 +41,15 @@ class CorpusService:
         self.error: str | None = None
         self.index: InvertedIndex | None = None
         self.index_error: str | None = None
-        self._candidates: list[Candidate] = []
-        self.index_path = db.index_dir / "foundation.json"
-        self.reload()
-        self._load_index()
+        self.index_event: dict = {}            # last lifecycle event, for the admin status page
+        self._by_id: dict = {}
+        self.index_path = db.index_dir / "shared-index.json"
+        self.reload(rebuild=False)
+        self._load_or_rebuild_index()
 
     # -- corpus -------------------------------------------------------------
-    def reload(self) -> None:
+    def reload(self, *, rebuild: bool = True) -> None:
+        """Re-scan the corpus folder; rebuild the index if the corpus changed."""
         with self._lock:
             try:
                 self.report = load_corpus(self.cfg.corpus_dir)
@@ -45,17 +59,25 @@ class CorpusService:
                 self.error = str(exc)
             docs = self.report.documents if self.report else []
             self._by_id = {d.doc_id: d for d in docs}
-            self._candidates = [Candidate(d.doc_id, d.title, d.text, "corpus", d.filename, d.metadata, d.modified)
-                                for d in docs]
+            if rebuild and self.report is not None and (
+                    self.index is None or self.index.settings.get("corpus_signature") != self.signature()):
+                try:
+                    self._rebuild_locked(reason="corpus changed")
+                except (OSError, ValueError) as exc:
+                    self.index_error = f"Index rebuild failed; the previous index is still in use: {exc}"
 
     def signature(self) -> str:
         docs = self.report.documents if self.report else []
         raw = "|".join(f"{d.doc_id}:{d.size_bytes}:{d.modified}" for d in sorted(docs, key=lambda d: d.doc_id))
         return hashlib.sha1(raw.encode()).hexdigest()
 
-    def candidates(self) -> list[Candidate]:
+    def snapshot(self) -> tuple:
+        """``(index, documents_by_id)`` captured together, consistent for one search."""
         with self._lock:
-            return list(self._candidates)
+            return self.index, self._by_id
+
+    def document_count(self) -> int:
+        return len(self._by_id)
 
     def get(self, doc_id: str):
         with self._lock:
@@ -63,7 +85,7 @@ class CorpusService:
 
     def categories(self) -> list[dict]:
         counts: dict[str, int] = {}
-        for c in self.candidates():
+        for c in list(self._by_id.values()):
             cat = c.metadata.get("category")
             if cat:
                 counts[cat] = counts.get(cat, 0) + 1
@@ -156,48 +178,83 @@ class CorpusService:
             self.audit.log(actor, "document_removed", r["filename"], doc_id=r["doc_id"])
         return removed
 
-    # -- index foundation -------------------------------------------------
-    def _load_index(self) -> None:
+    # -- index lifecycle ----------------------------------------------------
+    def _load_or_rebuild_index(self) -> None:
+        reason = None
         if self.index_path.is_file():
             try:
-                self.index = InvertedIndex.load(self.index_path)
-                self.index_error = None
+                idx = InvertedIndex.load(self.index_path)
+                problems = idx.validate()
+                if problems:
+                    reason = "stored index failed validation"
+                elif idx.settings.get("corpus_signature") != self.signature():
+                    reason = "stored index was built from a different corpus"
+                else:
+                    self.index = idx
+                    self.index_event = {"event": "loaded", "reason": "stored index is current"}
+                    return
             except (ValueError, KeyError, TypeError, OSError) as exc:
-                self.index = None
-                self.index_error = f"Stored index could not be read: {exc}"
+                reason = f"stored index unreadable ({type(exc).__name__})"
+        else:
+            reason = "no stored index"
+        if self.report is None:
+            self.index_error = self.error
+            return
+        try:
+            with self._lock:
+                self._rebuild_locked(reason=reason)
+        except (OSError, ValueError) as exc:
+            self.index_error = f"Index could not be built: {exc}"
+
+    def _rebuild_locked(self, *, reason: str, remove_stopwords: bool = False) -> InvertedIndex:
+        """Build, validate, persist atomically, then swap. Caller holds ``self._lock``."""
+        docs = list(self.report.documents) if self.report else []
+        idx = build_index(docs, remove_stopwords=remove_stopwords)
+        problems = idx.validate()
+        if problems:
+            raise ValueError("new index failed validation: " + "; ".join(problems[:3]))
+        previous = self.index.settings.get("generation", 0) if self.index else 0
+        idx.settings["corpus_signature"] = self.signature()
+        idx.settings["generation"] = previous + 1
+        idx.save(self.index_path)              # temp file + fsync + os.replace
+        self.index = idx
+        self.index_error = None
+        self.index_event = {"event": "rebuilt", "reason": reason}
+        return idx
 
     def index_status(self) -> dict:
         idx = self.index
         if idx is None:
-            state = "not_initialized"
+            state = "unavailable"
         elif idx.settings.get("corpus_signature") != self.signature():
             state = "stale"
         else:
             state = "current"
         return {"state": state, "error": self.index_error, "stats": idx.stats() if idx else None,
-                "corpus_documents": len(self._candidates),
-                "retrieval_enabled": False,
-                "note": "The index is available for inspection. Search results are not ranked using it yet."}
+                "generation": idx.settings.get("generation") if idx else None,
+                "last_event": self.index_event, "corpus_documents": len(self._by_id),
+                "retrieval_enabled": idx is not None,
+                "ranking": "term_frequency",
+                "note": "Search retrieves candidates from this index's posting lists and ranks them by term frequency."}
 
     def rebuild_index(self, actor: dict, remove_stopwords: bool = False) -> dict:
         if self.error:
             raise HttpError(503, "corpus_unavailable", self.error)
+        if remove_stopwords:
+            raise bad_request("Stop words are kept so that every query word can be matched.", "unsupported_option")
         with self._lock:
-            docs = list(self.report.documents)
-            if not docs:
-                raise bad_request("The shared corpus has no loadable documents.", "empty_corpus")
-            idx = initialize_foundation(docs, remove_stopwords=bool(remove_stopwords))
-            idx.settings["corpus_signature"] = self.signature()
-            idx.save(self.index_path)
-            self.index = idx
-            self.index_error = None
-        self.audit.log(actor, "index_initialized", "foundation", documents=len(docs),
-                       vocabulary=len(idx.postings), build_ms=idx.build_ms)
+            try:
+                idx = self._rebuild_locked(reason="requested by an administrator")
+            except (OSError, ValueError) as exc:
+                self.index_error = f"Index rebuild failed; the previous index is still in use: {exc}"
+                raise HttpError(500, "index_rebuild_failed", "The index couldn't be rebuilt. The previous index is still in use.")
+        self.audit.log(actor, "index_rebuilt", "shared-index", documents=len(idx.documents),
+                       vocabulary=len(idx.postings), build_ms=idx.build_ms, generation=idx.settings["generation"])
         return self.index_status()
 
     def vocabulary(self, q: str = "", sort: str = "term", page: int = 1, per_page: int = 50) -> dict:
         if not self.index:
-            raise HttpError(409, "index_not_initialized", "Initialize the index foundation first.")
+            raise HttpError(503, "index_unavailable", "The search index isn't available.")
         rows = self.index.vocabulary()
         if q:
             needle = normalize_text(q).replace(" ", "")
@@ -214,7 +271,7 @@ class CorpusService:
 
     def postings(self, term: str) -> dict:
         if not self.index:
-            raise HttpError(409, "index_not_initialized", "Initialize the index foundation first.")
+            raise HttpError(503, "index_unavailable", "The search index isn't available.")
         norm = normalize_text(term)
         if not norm or " " in norm:
             raise bad_request("Enter a single term.")

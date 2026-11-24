@@ -26,7 +26,7 @@ export default async function home(root, ctx) {
     <div>
       ${searchbar({ size: "lg", attach: true, voice: true, id: "home-q", label: "Search Virelix" })}
       <div class="attach-row mt-3"><div class="vx-chips" data-attachments aria-live="polite"></div>
-        <a class="vx-stamp text-decoration-none" href="/help#search" title="How search works">Document search preview</a></div>
+        <a class="vx-stamp text-decoration-none" href="/help#search" title="How search works">Ranked by term frequency</a></div>
     </div>
     <nav class="vx-entries" aria-label="Ways to work">${ENTRIES.map((e) => html`<a class="vx-entry" href="${e.href}">
       ${icon(e.icon)}<span class="name">${e.name}</span><span class="desc">${e.desc}</span>

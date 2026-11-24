@@ -1,5 +1,8 @@
 # Limitations and Week 2 handoff
 
+> Written at the end of Week 1. Week 2 is complete: see [week2-checklist.md](week2-checklist.md)
+> for what was delivered and [week3-handoff.md](week3-handoff.md) for current limitations.
+
 ## What Week 1 does **not** claim
 
 | Area | Current state | Not yet done |

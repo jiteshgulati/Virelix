@@ -19,7 +19,7 @@ test.describe("Search workspace", () => {
     await expect(page.locator(".vx-result").first()).toBeVisible();
     const first = page.locator(".vx-result").first();
     await expect(first.locator(".vx-provenance")).toContainText("matched 2/2");
-    await expect(page.locator(".vx-results-meta")).toContainText("documents contain all of");
+    await expect(page.locator(".vx-results-meta")).toContainText("documents contain any of"); // new accounts default to Any
   });
 
   test("empty, invalid and no-result queries are handled", async ({ page }) => {
@@ -29,7 +29,7 @@ test.describe("Search workspace", () => {
     await expect(page.getByText("Type something to search for.")).toBeVisible();
     await page.goto("/search?q=%21%21%21");
     await expect(page.getByRole("heading", { name: "That query can't be searched" })).toBeVisible();
-    await page.goto("/search?q=zzqxvv%20index");
+    await page.goto("/search?q=zzqxvv%20index&mode=all");
     await expect(page.getByRole("heading", { name: "No documents match" })).toBeVisible();
     await page.getByRole("button", { name: "Match any term instead" }).click();
     await expect(page.locator(".vx-result").first()).toBeVisible();
@@ -50,13 +50,12 @@ test.describe("Search workspace", () => {
     await expect(page.getByRole("button", { name: /^Filter/ })).toBeFocused();
 
     await page.getByRole("button", { name: /^Filter/ }).click();
-    await panel.getByLabel("Any term").check();
+    await expect(panel.getByLabel("Any term")).toBeChecked();          // default for new accounts
     await panel.getByRole("checkbox", { name: /Algorithms/ }).check();
     await expect(panel.getByRole("checkbox", { name: /PDF/ })).toBeDisabled();
     await panel.getByRole("button", { name: "Apply filters" }).click();
-    await expect(page).toHaveURL(/mode=any/);
     await expect(page).toHaveURL(/categories=Algorithms/);
-    await expect(page.getByRole("button", { name: "Filter, 2 active" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Filter, 1 active" })).toBeVisible();
     const cats = await page.locator(".vx-result .src").allInnerTexts();
     expect(cats.length).toBeGreaterThan(0);
     cats.forEach((t) => expect(t).toContain("Algorithms"));

@@ -10,7 +10,7 @@
 - [ ] Analysis / evaluation
 - [ ] Docs / tooling
 
-Shared module touched (`backend/app.py`, `backend/search/preview.py`, `backend/services/corpus.py`, `docs/api.md`)? If so, the other developer must approve.
+Shared module touched (`backend/app.py`, `backend/search/overview.py`, `backend/services/search.py`, `backend/services/corpus.py`, `docs/api.md`)? If so, the other developer must approve.
 
 ## Checklist
 

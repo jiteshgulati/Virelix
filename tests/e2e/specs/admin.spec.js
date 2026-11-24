@@ -47,7 +47,7 @@ test.describe("Administration", () => {
     await expect(page.getByText("2 selected")).toBeHidden();
   });
 
-  test("index foundation: build, inspect vocabulary and postings", async ({ page }) => {
+  test("document index: rebuild, inspect vocabulary and postings", async ({ page }) => {
     await page.goto("/admin/index");
     await page.getByRole("button", { name: /Rebuild index|Build index/ }).first().click();
     await page.getByRole("dialog").getByRole("button", { name: /Build|Rebuild/ }).click();

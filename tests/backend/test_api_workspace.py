@@ -16,10 +16,11 @@ class SearchAndWorkspaceTests(ServerTestCase):
         status, data, _ = self.c.get("/api/search?q=inverted%20index&record=1")
         self.assertEqual(status, 200)
         self.assertGreater(data["total"], 0)
-        self.assertIn("aren't ranked by relevance", data["method"])
+        self.assertIn("Ranked by term frequency", data["method"])
         first = data["results"][0]
+        self.assertEqual(first["score"], sum(first["term_frequencies"].values()))
         self.assertEqual(first["matched_terms"], ["inverted", "index"])
-        self.assertNotIn("score", first)
+        self.assertEqual(first["title"], "Inverted Index Fundamentals")  # highest term frequency (3 + 9)
         hist = self.c.get("/api/history")[1]["items"]
         self.assertEqual(hist[0]["query"], "inverted index")
         self.assertEqual(hist[0]["result_count"], data["total"])
@@ -39,10 +40,10 @@ class SearchAndWorkspaceTests(ServerTestCase):
         self.assertTrue(all(x["category"] == "Databases" for x in r["results"]))
 
     def test_consecutive_identical_searches_are_not_duplicated(self):
-        self.c.get("/api/search?q=hash&record=1")
-        self.c.get("/api/search?q=hash&record=1")
+        self.c.get("/api/search?q=hash&mode=all&record=1")
+        self.c.get("/api/search?q=hash&mode=all&record=1")
         self.c.get("/api/search?q=hash&mode=any&record=1")
-        self.c.get("/api/search?q=hash&record=1")
+        self.c.get("/api/search?q=hash&mode=all&record=1")
         self.assertEqual([h["mode"] for h in self.c.get("/api/history")[1]["items"]], ["all", "any", "all"])
 
     def test_history_respects_preference(self):
@@ -140,11 +141,13 @@ class AdminCorpusTests(ServerTestCase):
         user = self.signup("reader@virelix.test")
         self.assertEqual(user.get("/api/search?q=quasar")[1]["total"], 1)
 
-        self.assertEqual(admin.get("/api/admin/index")[1]["state"], "not_initialized")
-        self.assertEqual(admin.get("/api/admin/index/vocabulary")[0], 409)
+        # The index is rebuilt automatically when the corpus changes: the upload is already indexed.
+        status, idx, _ = admin.get("/api/admin/index")
+        self.assertEqual((idx["state"], idx["stats"]["documents"], idx["last_event"]["reason"]), ("current", 3, "corpus changed"))
+        self.assertTrue(idx["retrieval_enabled"])
+        generation = idx["generation"]
         status, idx, _ = admin.post("/api/admin/index/rebuild", {})
-        self.assertEqual((status, idx["state"], idx["stats"]["documents"]), (200, "current", 3))
-        self.assertFalse(idx["retrieval_enabled"])
+        self.assertEqual((status, idx["state"], idx["generation"]), (200, "current", generation + 1))
         post = admin.get("/api/admin/index/postings?term=Quasar")[1]
         self.assertEqual((post["term"], post["df"], post["postings"][0]["tf"]), ("quasar", 1, 1))
         vocab = admin.get("/api/admin/index/vocabulary?q=hash&sort=df")[1]
@@ -154,7 +157,8 @@ class AdminCorpusTests(ServerTestCase):
         self.assertEqual(admin.post("/api/admin/documents/remove", {"doc_ids": [doc["doc_id"]]})[0], 200)
         self.assertFalse((self.cfg.corpus_dir / "evil-name.txt").exists())
         self.assertEqual(user.get("/api/search?q=quasar")[1]["total"], 0)
-        self.assertEqual(admin.get("/api/admin/index")[1]["state"], "stale")
+        self.assertEqual(admin.get("/api/admin/index")[1]["state"], "current")
+        self.assertEqual(admin.get("/api/admin/index/postings?term=quasar")[1]["df"], 0)
         self.assertIn("document_removed", [e["action"] for e in self.owner().get("/api/owner/audit")[1]["items"]])
 
 

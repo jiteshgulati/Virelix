@@ -794,3 +794,8 @@ html[data-motion="reduce"] .vx-btn .spinner, html[data-motion="reduce"] .vx-skel
   .vx-sidebar, .vx-topbar, .vx-doc-actions, .vx-doc-aside, .vx-followup { display: none !important; }
   .vx-app { display: block; }
 }
+
+/* Relevance score and per-term frequencies on search results */
+.vx-score { display: inline-flex; align-items: baseline; gap: 4px; height: 20px; padding: 0 7px; font-family: var(--font-mono); font-size: 11px; color: var(--ink-2); border: 1px solid var(--rule-strong); border-radius: var(--r-xs); line-height: 18px; }
+.vx-score b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.vx-term .tf { margin-left: 3px; color: var(--ink-2); font-weight: 600; font-variant-numeric: tabular-nums; }

@@ -151,7 +151,7 @@ class Governance:
             fresh = dict(users[user["id"]])
         self.audit.log(fresh, "admin_invite_accepted", fresh["email"], invitation=inv["id"])
         self.notifier.push(fresh["id"], "role", "Admin access granted",
-                           "You can now manage the shared corpus, index foundation and users.", "/admin")
+                           "You can now manage the shared corpus, the search index and users.", "/admin")
         owner = self.db.users.read().get(inv["invited_by"])
         if owner:
             self.notifier.push(owner["id"], "role", "Invitation accepted",

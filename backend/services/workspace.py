@@ -8,7 +8,8 @@ from pathlib import Path
 
 from backend import security as sec
 from backend.search.loader import decode_bytes, derive_title, parse_document_text
-from backend.search.preview import Candidate
+from backend.search.index import build_index
+from backend.search.loader import Document
 from backend.services.auth import DEFAULT_PREFS
 from backend.services.common import conflict, iso, not_found, now
 from backend.web import HttpError, bad_request
@@ -41,6 +42,8 @@ class WorkspaceService:
         self.db = db
         self.corpus = corpus
         self._att_lock = threading.Lock()
+        self._private_lock = threading.Lock()
+        self._private_cache: dict = {}   # user_id -> (signature, index, documents_by_id)
 
     def _ws(self, data: dict, user_id: str) -> dict:
         ws = data.setdefault(user_id, _empty())
@@ -115,7 +118,7 @@ class WorkspaceService:
         doc = self.corpus.get(doc_id) if isinstance(doc_id, str) else None
         if not doc:
             raise not_found("That document is no longer in the shared corpus.")
-        from backend.search.preview import lead_excerpt
+        from backend.search.overview import lead_excerpt
         return {"doc_id": doc.doc_id, "title": doc.title, "source": "corpus", "filename": doc.filename,
                 "category": doc.metadata.get("category"),
                 "excerpt": doc.metadata.get("summary") or lead_excerpt(doc.text, 220)}
@@ -141,15 +144,8 @@ class WorkspaceService:
             saved.insert(0, item)
         return item
 
-    def save_overview(self, user_id: str, payload: dict) -> dict:
-        """Save an extractive overview. Passages are re-derived server-side, never trusted from the client."""
-        from backend.search.preview import QueryError, overview
-        query = payload.get("query") or ""
-        mode = payload.get("mode") or "all"
-        try:
-            result = overview(self.corpus.candidates(), query, mode=mode)
-        except QueryError as exc:
-            raise bad_request(str(exc))
+    def save_overview(self, user_id: str, query: str, mode: str, result: dict) -> dict:
+        """Save an extractive overview computed by the server (never from client-supplied passages)."""
         if not result["passages"]:
             raise bad_request("There is no overview content to save for this query.", "nothing_to_save")
         with self.db.workspace.update() as data:
@@ -359,13 +355,29 @@ class WorkspaceService:
         except OSError:
             raise not_found("Attachment file is missing.")
 
-    def attachment_candidates(self, user_id: str) -> list[Candidate]:
-        out = []
-        for a in self.list_attachments(user_id):
+    def private_index(self, user_id: str) -> tuple:
+        """``(index, documents_by_id)`` over this user's current attachments only.
+
+        Built in memory from the user's own files and cached until their set of
+        attachments changes (upload, removal, clearing or expiry). It's never merged
+        into the shared index, persisted, or exposed through administration APIs.
+        """
+        current = self.list_attachments(user_id)          # also purges expired attachments
+        signature = tuple((a["id"], a["uploaded_at"]) for a in current)
+        with self._private_lock:
+            cached = self._private_cache.get(user_id)
+            if cached and cached[0] == signature:
+                return cached[1], cached[2]
+        docs = {}
+        for a in current:
             try:
                 _, text = self.attachment_text(user_id, a["id"])
             except HttpError:
                 continue
-            out.append(Candidate(a["id"], a["title"], text, "attachment", a["filename"], a.get("metadata") or {},
-                                 a["uploaded_at"]))
-        return out
+            docs[a["id"]] = Document(doc_id=a["id"], filename=a["filename"], title=a["title"], text=text,
+                                     metadata=a.get("metadata") or {}, size_bytes=a["size_bytes"],
+                                     modified=a["uploaded_at"], encoding=a.get("encoding", "utf-8"))
+        index = build_index(list(docs.values()))
+        with self._private_lock:
+            self._private_cache[user_id] = (signature, index, docs)
+        return index, docs

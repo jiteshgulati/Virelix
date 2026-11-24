@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+# One run per pull request or branch: a newer push cancels the superseded run.
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  PYTHONIOENCODING: utf-8
+  PYTHONUNBUFFERED: "1"
+
+jobs:
+  backend:
+    name: Backend · ${{ matrix.os }} · Python ${{ matrix.python }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest,  python: "3.11" }
+          - { os: ubuntu-latest,  python: "3.13" }
+          - { os: windows-latest, python: "3.13" }
+          - { os: macos-latest,   python: "3.13" }
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Unit, search-engine, API and security tests
+        run: python -m unittest discover -s tests/backend -t . -v
+      - name: Start-up smoke test (server, sign-in, ranked search, data-folder lock)
+        run: python scripts/smoke_test.py
+
+  browser:
+    name: Browser · Playwright Chromium
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: tests/e2e
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: tests/e2e/package-lock.json
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: End-to-end, responsive and accessibility tests
+        run: npx playwright test --reporter=list
+      - name: Keep failure traces
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-results
+          path: tests/e2e/results
+          retention-days: 7

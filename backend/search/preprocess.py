@@ -10,8 +10,12 @@ Pipeline, applied in this order:
 5. Whitespace normalisation (runs of any whitespace collapse to one space).
 6. Tokenisation on single spaces.
 
-Stop-word removal is *optional* and off by default. Whether ranked retrieval
-uses it is recorded in the index settings when the index is built.
+Stop-word removal is *optional* and off by default; the search index keeps
+stop words so that every query word can be matched.
+
+``tokenize_with_offsets`` applies the same pipeline but also reports where each
+token sits in the original text, so snippets can highlight exactly the words
+the index matched.
 """
 
 from __future__ import annotations
@@ -22,6 +26,7 @@ from typing import Iterable
 
 _APOSTROPHES = re.compile(r"(?<=\w)['’`](?=\w)")
 _NON_ALNUM = re.compile(r"[^0-9a-zÀ-ɏͰ-ϿЀ-ӿ]+")
+_ALNUM_RUN = re.compile(r"[0-9a-zÀ-ɏͰ-ϿЀ-ӿ]+")
 _WS = re.compile(r"\s+")
 
 # A compact English stop-word list (articles, auxiliaries, pronouns, prepositions).
@@ -60,6 +65,35 @@ def tokenize(text: str | None, *, remove_stopwords: bool = False, min_length: in
     if remove_stopwords:
         tokens = [t for t in tokens if t not in STOPWORDS]
     return tokens
+
+
+def tokenize_with_offsets(text: str | None) -> list[tuple[str, int, int]]:
+    """``[(token, start, end), …]`` where ``text[start:end]`` is the token's raw span.
+
+    The token strings are the same as ``tokenize(text)``. Each base character is
+    normalised together with any combining marks that follow it, so the
+    normalised text can be mapped back to positions in the original.
+    """
+    if not text:
+        return []
+    chars: list[str] = []          # normalised characters
+    origin: list[tuple] = []       # raw (start, end) of the cluster each came from
+    i, n = 0, len(text)
+    while i < n:
+        j = i + 1
+        while j < n and unicodedata.combining(text[j]):
+            j += 1
+        for ch in unicodedata.normalize("NFKC", text[i:j]).casefold():
+            chars.append(ch)
+            origin.append((i, j))
+        i = j
+    folded = "".join(chars)
+    drop = {m.start() for m in _APOSTROPHES.finditer(folded)}
+    if drop:
+        chars = [c for k, c in enumerate(chars) if k not in drop]
+        origin = [o for k, o in enumerate(origin) if k not in drop]
+        folded = "".join(chars)
+    return [(m.group(), origin[m.start()][0], origin[m.end() - 1][1]) for m in _ALNUM_RUN.finditer(folded)]
 
 
 def unique_terms(tokens: Iterable[str]) -> list[str]:

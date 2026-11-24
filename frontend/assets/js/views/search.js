@@ -1,4 +1,4 @@
-import { html, mount, $, $$, on, highlight, announce, setTitle } from "../core/dom.js";
+import { html, mount, $, $$, on, highlight, highlightRanges, announce, setTitle } from "../core/dom.js";
 import { icon } from "../core/icons.js";
 import { get, post, qs } from "../core/api.js";
 import { session } from "../core/store.js";
@@ -29,8 +29,15 @@ const UNAVAILABLE = {
   books: { iconName: "book", title: "Book search isn't connected", body: "No catalogue or book provider is integrated. Long-form documents you add to the corpus appear under All.", points: ["Admins can add .txt documents to the shared corpus."] },
 };
 const SORTS = [
-  ["coverage", "Most terms matched"], ["title_asc", "Title A–Z"], ["title_desc", "Title Z–A"], ["date_desc", "Newest first"], ["date_asc", "Oldest first"],
+  ["relevance", "Relevance"], ["title_asc", "Title A–Z"], ["title_desc", "Title Z–A"], ["date_desc", "Newest first"], ["date_asc", "Oldest first"],
 ];
+const SORT_ALIASES = { coverage: "relevance" }; // links saved before ranking was introduced
+const MODE_GUIDE = [["any", "Any term", "hashing sorting → documents with either word, most occurrences first."],
+  ["all", "All terms", "inverted index → only documents containing both words."],
+  ["phrase", "Exact phrase", "search engine → the words together, in order."]];
+
+/** "index ×9 + inverted ×3" — the parts of a score, in query order. */
+const scoreParts = (r) => Object.entries(r.term_frequencies || {}).map(([t, n]) => `${t} ×${n}`).join(" + ");
 const FKEY = "vx-search-filters";
 
 function readFilters(query, prefs) {
@@ -59,7 +66,7 @@ export default async function search(root, ctx) {
   const state = {
     q: (ctx.query.get("q") || "").trim(),
     tab: TABS.some((t) => t.id === ctx.query.get("tab")) ? ctx.query.get("tab") : "all",
-    sort: SORTS.some(([v]) => v === ctx.query.get("sort")) ? ctx.query.get("sort") : "coverage",
+    sort: (() => { const s = SORT_ALIASES[ctx.query.get("sort")] || ctx.query.get("sort"); return SORTS.some(([v]) => v === s) ? s : "relevance"; })(),
     page: Math.max(1, parseInt(ctx.query.get("page") || "1", 10) || 1),
     filters: readFilters(ctx.query, prefs),
     record: true,
@@ -114,7 +121,7 @@ export default async function search(root, ctx) {
     mount($("[data-sort-menu]", root), html`<h6 class="dropdown-header">Order results by</h6>${SORTS.map(([v, l]) => html`
       <button type="button" class="dropdown-item" role="menuitemradio" aria-checked="${state.sort === v}" data-sort="${v}">
       ${state.sort === v ? icon("check", "sm") : html`<span class="vx-i sm"></span>`} ${l}</button>`)}
-      <div class="dropdown-divider"></div><div class="px-3 pb-1 meta">Results aren't ranked by relevance yet.</div>`);
+      <div class="dropdown-divider"></div><div class="px-3 pb-1 meta vx-sort-note">Relevance: how many times your words occur in each document.</div>`);
     const disabled = !state.q || state.tab !== "all";
     $("[data-sort-btn]", root).disabled = disabled;
   }
@@ -126,7 +133,7 @@ export default async function search(root, ctx) {
     $("[data-filter-trigger]", root).setAttribute("aria-label", n ? `Filter, ${n} active` : "Filter");
   }
   function sync() {
-    updateQuery({ q: state.q, tab: state.tab !== "all" ? state.tab : "", sort: state.sort !== "coverage" ? state.sort : "",
+    updateQuery({ q: state.q, tab: state.tab !== "all" ? state.tab : "", sort: state.sort !== "relevance" ? state.sort : "",
       page: state.page > 1 ? state.page : "", mode: state.filters.mode !== defaults.mode ? state.filters.mode : "",
       sources: state.filters.sources.join() !== defaults.sources.join() ? state.filters.sources : "",
       categories: state.filters.categories });
@@ -168,9 +175,8 @@ export default async function search(root, ctx) {
     mount(body, html`<div class="vx-stack-lg">
       <div><div class="eyebrow mb-2">Search</div><h2 class="page-title">What are you looking for?</h2>
         <p class="lede mt-2">Type words that should appear in a document. Results come from the shared corpus and your private attachments.</p></div>
-      <div class="vx-grid-3">${[["all", "All terms", "inverted index → documents containing both words."], ["any", "Any term", "hashing OR sorting → documents with either."], ["phrase", "Exact phrase", "“search engine” → the words together, in order."]]
-        .map(([m, t, d]) => html`<div class="vx-panel vx-panel-pad"><div class="fw-semibold">${t}</div><p class="meta mt-1">${d}</p></div>`)}</div>
-      <div class="vx-notice">${icon("info")}<div><strong>Document search preview.</strong> Every document is checked for your words, and each result shows exactly which ones matched. Results aren't ranked by relevance yet.</div></div>
+      <div class="vx-grid-3">${MODE_GUIDE.map(([m, t, d]) => html`<div class="vx-panel vx-panel-pad"><div class="fw-semibold">${t}${m === defaults.mode ? html` <span class="vx-stamp">Your default</span>` : ""}</div><p class="meta mt-1">${d}</p></div>`)}</div>
+      <div class="vx-notice">${icon("info")}<div><strong>Ranked by term frequency.</strong> Each result's score is the number of times your words occur in it, so documents that use them most come first. Each result shows the count for every word.</div></div>
     </div>`);
   }
 
@@ -194,7 +200,8 @@ export default async function search(root, ctx) {
         <div><strong class="tabular">${plural(data.total, "document")}</strong> ${how}
           ${data.mode === "phrase" ? html`<span class="vx-term">${data.terms.join(" ")}</span>` : data.terms.map((t) => html` <span class="vx-term">${t}</span>`)}
           <span class="ms-1">· searched ${num(data.searched)}</span></div>
-        <button type="button" class="vx-btn sm quiet" data-bs-toggle="popover" data-method>${icon("info", "sm")} How results are chosen</button>
+        <span class="vx-row gap-2"><span class="meta tabular" title="Time the server took to find and rank these results">${data.response_time_ms} ms</span>
+        <button type="button" class="vx-btn sm quiet" data-bs-toggle="popover" data-method>${icon("info", "sm")} How results are ranked</button></span>
       </div>
       ${hasApplied ? html`<div class="vx-applied">${applied}<button type="button" class="vx-btn sm quiet" data-clear-filters>Clear filters</button></div>` : ""}
       ${data.terms_without_matches.length && data.total ? html`<div class="vx-notice">${icon("info")}<div>No document contains ${data.terms_without_matches.map((t) => html`<span class="vx-term missing">${t}</span> `)}</div></div>` : ""}
@@ -208,7 +215,7 @@ export default async function search(root, ctx) {
           </ul></nav>` : ""}`
       : noResults(data)}`);
     const pop = $("[data-method]", body);
-    if (pop) new window.bootstrap.Popover(pop, { content: data.method, placement: "bottom", trigger: "focus click", customClass: "vx-popover" });
+    if (pop) new window.bootstrap.Popover(pop, { content: `${data.method} A score is a count of occurrences, not a percentage.`, placement: "bottom", trigger: "focus click", customClass: "vx-popover" });
     announce(`${data.total} documents found`);
   }
 
@@ -238,10 +245,12 @@ export default async function search(root, ctx) {
           ${r.date ? html`<span class="dot"></span><span>${date(r.date)}</span>` : ""}
           <span class="dot"></span><span class="mono">${r.filename}</span></div>
         <h3><a href="${href}">${highlight(r.title, terms)}</a></h3>
-        ${showEx ? html`<p class="excerpt"><span class="kind">${r.excerpt_kind === "summary" ? "Summary" : "Opening"}</span>${highlight(r.excerpt, terms)}</p>` : ""}
+        ${showEx ? snippetBlock(r, terms) : ""}
         <div class="foot">
-          ${showTerms ? html`<div class="vx-provenance"><span class="lbl">matched ${terms.length}/${data.terms.length}</span>
-            ${terms.map((t) => html`<span class="vx-term">${t}</span>`)}${r.missing_terms.map((t) => html`<span class="vx-term missing" title="Not in this document">${t}</span>`)}</div>` : html`<span></span>`}
+          <div class="vx-provenance">
+            <span class="vx-score" role="img" aria-label="Score ${r.score}: ${scoreParts(r)}" title="Score: total occurrences of your words in this document">score <b>${num(r.score)}</b></span>
+            ${showTerms ? html`<span class="lbl">matched ${terms.length}/${data.terms.length}</span>
+            ${terms.map((t) => html`<span class="vx-term" title="${t} occurs ${r.term_frequencies[t]} ${r.term_frequencies[t] === 1 ? "time" : "times"}">${t}<span class="tf">×${r.term_frequencies[t]}</span></span>`)}${r.missing_terms.map((t) => html`<span class="vx-term missing" title="Not in this document">${t}</span>`)}` : ""}</div>
           <div class="acts">
             ${isCorpus ? html`<button type="button" class="vx-btn sm quiet" data-save="${r.doc_id}" aria-pressed="${r.saved}" aria-label="${r.saved ? "Remove from Saved Results" : "Save result"}">${icon("bookmark", "sm")}<span data-label>${r.saved ? "Saved" : "Save"}</span></button>
               <button type="button" class="vx-btn sm quiet" data-collect="${r.doc_id}" data-title="${r.title}">${icon("stack", "sm")}<span class="hide-xs">Collection</span></button>` : ""}
@@ -255,6 +264,12 @@ export default async function search(root, ctx) {
           </div>
         </div>
       </div></li>`;
+  }
+
+  function snippetBlock(r, terms) {
+    const s = r.snippet;
+    if (!s || !s.text) return html`<p class="excerpt"><span class="kind">${r.excerpt_kind === "summary" ? "Summary" : "Opening"}</span>${highlight(r.excerpt, terms)}</p>`;
+    return html`<p class="excerpt" data-snippet="${s.kind}">${s.kind === "opening" ? html`<span class="kind">Opening</span>` : ""}${s.leading_ellipsis ? "…" : ""}${highlightRanges(s.text, s.highlights)}${s.trailing_ellipsis ? (/[.!?]["')\]’”]*$/.test(s.text) ? " …" : "…") : ""}</p>`;
   }
 
   async function runOverview(signal) {
