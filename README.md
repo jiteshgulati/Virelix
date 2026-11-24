@@ -15,24 +15,24 @@ and an inverted index) with a complete product around it: accounts with three ro
 workspace for every user, and administration of the shared corpus. It runs on the Python standard
 library and a vanilla HTML/CSS/JavaScript front end, with no packages and no build step.
 
-> **Search today is a document search preview.** Every document is checked for your query words, and
-> each result shows exactly which words matched. Results aren't ranked by relevance yet, and nothing in
-> the interface claims otherwise.
+> **Search is ranked by term frequency.** A document's score is the number of times the query's words
+> occur in it, read from the inverted index. Each result shows its score, the count for every word and
+> a highlighted passage. A score is a count, never a percentage.
 
 ## Features
 
 | Area | What works today |
 |---|---|
-| Search | Document search preview (all terms, any term, exact phrase), floating filters (source, matching mode, subject), sorting, pagination, matched-term provenance on every result, follow-up refinement |
-| AI Overview | Extractive: sentences quoted verbatim from matching documents with numbered references; can be saved. Not generative |
+| Search | Inverted-index retrieval ranked by term frequency (any term by default, all terms, exact phrase); score and per-term counts on every result; highlighted snippets; floating filters (source, matching mode, subject); relevance, title and date sorting over the full result set; pagination; response time; follow-up refinement |
+| AI Overview | Extractive: sentences quoted verbatim from the highest-ranked matching documents with numbered references; can be saved. Not generative |
 | Documents | Reader with highlighting, metadata, save and add-to-collection |
-| Workspace | Search history, saved results and previews, collections, private `.txt` attachments (24 h), in-app notifications |
+| Workspace | Search history, saved results and previews, collections, private `.txt` attachments (24 h) searched through a private per-user index, in-app notifications |
 | Accounts | Registration, email verification, sign-in with throttling, remember me, password reset and change, session management |
-| Administration | Corpus overview, global documents (upload, preview, bulk removal), inverted-index inspection and rebuild, user suspension, system status |
+| Administration | Corpus overview, global documents (upload, preview, bulk removal), inverted-index status, inspection and rebuild, user suspension, system status |
 | Governance | Admin invitations (email-bound, expiring, single use), Admin removal, audit log, ownership status |
 | Appearance | Light (default), dark, OLED and system themes; six accents; text size, density, sidebar and motion preferences; responsive from 320 px |
 
-**Not available yet**, and labelled as such in the app: ranked search, AI Answers, Research Mode,
+**Not available yet**, and labelled as such in the app: AI Answers, Research Mode,
 voice search, web/academic/code/media sources, search analytics, search-quality metrics and email delivery.
 
 ## Technology
@@ -123,14 +123,16 @@ One shared installation has exactly one Owner; ownership never transfers automat
 
 1. **Loading.** `.txt` files in `corpus/` are discovered and decoded (UTF-8 with fallbacks), given stable IDs (`doc-` + hash of the filename) and parsed for an optional `Key: value` metadata header.
 2. **Preprocessing.** NFKC normalisation, case folding, apostrophe joining, punctuation to spaces, whitespace collapse, tokenisation. The same pipeline is applied to queries.
-3. **Index.** An inverted index of terms → postings (document, term frequency, positions), with vocabulary statistics. Admins build and inspect it in *Index management*.
-4. **Search preview.** Documents containing the query terms (all, any or exact phrase) are returned, ordered by the number of terms matched or by the sort you choose. **No relevance score is shown because none is computed yet.**
+3. **Index.** An inverted index of terms → postings (document, term frequency, positions), with vocabulary statistics. It's loaded and validated at start-up, rebuilt automatically when it's missing, damaged or out of date and whenever documents are added or removed, and can be inspected and rebuilt in *Index management*. Each member's attachments get their own private index.
+4. **Retrieval.** Only the posting lists of the query's words are read: their union for *Any term*, their intersection for *All terms*, and the intersection plus a position check for *Exact phrase*.
+5. **Ranking.** `Score(d, q) = Σ tf(t, d)` over the query's distinct words, so a document mentioning "python" three times and "programming" twice scores 5 for `python programming`. Repeating a query word doesn't change any score. Equal scores are ordered by title, then document ID. Sorting and filters apply to the full result set before pagination.
+6. **Snippets.** For each result on the page, the 160–240 character passage containing the most distinct query words is shown, cut at sentence or word boundaries with the words highlighted. When the words only occur in the title, the document's opening is shown instead.
 
 ## Screenshots
 
 | | |
 |---|---|
-| ![Home](docs/screenshots/03-home.png) Home | ![Extractive overview](docs/screenshots/06-extractive-overview.png) Extractive overview |
+| ![Ranked results](docs/screenshots/04-search-results.png) Ranked results | ![Extractive overview](docs/screenshots/06-extractive-overview.png) Extractive overview |
 | ![Document viewer](docs/screenshots/08-document-viewer.png) Document viewer | ![Index management](docs/screenshots/15-admin-index.png) Index management |
 | ![Admin management](docs/screenshots/21-owner-admin-management.png) Admin management | ![Dark theme](docs/screenshots/23-dark-search.png) Dark theme |
 
@@ -142,6 +144,7 @@ All screenshots are in [docs/screenshots/](docs/screenshots/) and are generated 
 python3 -m unittest discover -s tests/backend -t .     # backend (Windows: py -m unittest discover -s tests/backend -t .)
 cd tests/e2e && npm ci && npx playwright install chromium
 npx playwright test                                    # browser; isolated server on port 8799
+python3 scripts/smoke_test.py                          # start-up smoke test (from the project root)
 ```
 
 Browser tests run their own server with a copied corpus, temporary data and synthetic accounts.
@@ -151,10 +154,10 @@ Node.js and Playwright are development tools only. Latest verified results: [doc
 
 | Platform | Status |
 |---|---|
-| Windows (native Python 3.14) | Backend suite run and the server started, served pages and refused a second instance on a real Windows install. The browser suite hasn't been run on Windows |
+| Windows (native Python 3.14) | Backend suite and start-up smoke test (server, sign-in, ranked search, second-instance refusal) pass on a real Windows install. The browser suite hasn't been run on Windows |
 | Linux (Python 3.14, WSL2 Ubuntu) | Backend and browser suites run |
 | macOS | Backend suite passes in GitHub Actions (`macos-latest`). Not tested interactively |
-| CI | GitHub Actions runs the backend suite on Ubuntu, Windows and macOS and the browser suite on Ubuntu for every push and pull request. All four jobs passed on publication |
+| CI | `.github/workflows/ci.yml` runs the backend suite and smoke test on Ubuntu (Python 3.11 and 3.13), Windows and macOS, and the browser suite on Ubuntu, for every pull request and every push to `master`. Results are recorded in [docs/test-results.md](docs/test-results.md) |
 
 ## Project structure
 
@@ -165,7 +168,7 @@ frontend/                 index.html, CSS, ES-module JavaScript, vendored Bootst
 corpus/                   31 sample .txt documents + inventory.json
 data/                     runtime data (git-ignored)
 analysis/                 reserved for query analysis
-scripts/                  corpus_inventory.py · owner_recovery.py
+scripts/                  corpus_inventory.py · owner_recovery.py · smoke_test.py
 tests/backend/  tests/e2e/
 docs/                     architecture, API, roles, design system, team, test results, screenshots
 ```
@@ -210,7 +213,9 @@ Virelix is developed as **PST_AD_164: Search Engine Backend (Mini Elasticsearch)
 query analytics; evaluation and delivery. Academic planning stays separate from the product:
 
 - [Week 1 acceptance checklist](docs/week1-checklist.md)
-- [Limitations and Week 2 handoff](docs/week2-handoff.md)
+- [Limitations and Week 2 handoff](docs/week2-handoff.md) (the Week 1 plan for Week 2)
+- [Week 2 acceptance checklist](docs/week2-checklist.md)
+- [Week 3 handoff](docs/week3-handoff.md)
 - [Analysis plan](analysis/README.md)
 - [Team responsibilities by milestone](docs/team-responsibilities.md)
 

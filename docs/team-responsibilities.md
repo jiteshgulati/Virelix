@@ -67,7 +67,8 @@ changes; *Reviewer* reviews pull requests that touch it. Shared rows name a lead
 | Path | Purpose | Primary | Reviewer | Reason |
 |---|---|---|---|---|
 | `backend/search/loader.py` | TXT discovery, decoding, metadata, stable IDs, load report | C | J | Document processing |
-| `backend/search/preprocess.py` | Normalisation and tokenisation | C | J | Text processing. J reviews because the index depends on it |
+| `backend/search/preprocess.py` | Normalisation and tokenisation, including offset-aware tokens for highlighting | C | J | Text processing. J reviews because the index depends on it |
+| `backend/search/snippets.py` | Query-aware snippets with structured highlight ranges | C | J | Result presentation |
 | `backend/search/index.py` | Inverted index: postings, TF, positions, validation, persistence | J | C | Core index |
 | `backend/search/engine.py` | Query parsing, posting-list retrieval, TF scoring, deterministic ranking | J | C | Ranked retrieval |
 | `backend/search/overview.py` | Extractive overview over ranked hits; opening excerpts | **Shared**: J leads selection from ranked hits; C leads passage presentation | both | Spans retrieval and result presentation |
@@ -110,7 +111,7 @@ changes; *Reviewer* reviews pull requests that touch it. Shared rows name a lead
 
 | Path | Purpose | Primary | Reviewer | Reason |
 |---|---|---|---|---|
-| `tests/backend/test_loader.py`, `test_preprocess.py` | Loader and preprocessing | C | J | Matches module ownership |
+| `tests/backend/test_loader.py`, `test_preprocess.py`, `test_snippets.py` | Loader, preprocessing and snippets | C | J | Matches module ownership |
 | `tests/backend/test_index.py`, `test_search_engine.py` | Index, query processing, retrieval, ranking, index lifecycle | J | C | Matches module ownership |
 | `tests/backend/test_search_api.py` | Ranked search through the API; private-index isolation | **Shared** | both | Crosses services |
 | `tests/backend/test_api_auth.py`, `test_api_roles.py`, `test_governance_security.py` | Authentication, roles, governance, security, start-up | J | C | Security testing |
@@ -126,7 +127,7 @@ changes; *Reviewer* reviews pull requests that touch it. Shared rows name a lead
 | `docs/architecture.md`, `docs/roles-and-onboarding.md` | Architecture, security, roles | J | C |
 | `docs/design-system.md`, `docs/corpus-inventory.md`, `docs/screenshots/` | Design system, corpus, screenshots | C | J |
 | `docs/test-results.md` | Verified test results | Shared | both |
-| `docs/week1-checklist.md`, `docs/week2-handoff.md` | Academic acceptance and handoff | Shared | both |
+| `docs/week1-checklist.md`, `docs/week2-handoff.md`, `docs/week2-checklist.md`, `docs/week3-handoff.md` | Academic acceptance and handoff | Shared | both |
 | `docs/team-responsibilities.md`, `CONTRIBUTING.md`, `THIRD_PARTY_NOTICES.md` | Collaboration and licences | Shared | both |
 | `.gitignore`, `.env.example`, `requirements.txt` | Repository safety and configuration | J | C |
 

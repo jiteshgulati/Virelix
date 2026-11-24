@@ -42,6 +42,26 @@ The scale is a 1.25 ratio from the base: caption 11.2 · small 13 · body 14 · 
 
 ## Components (CSS classes)
 
-`vx-btn` (primary · quiet · danger · danger-solid · sm · icon) · `vx-input` / `vx-select` / `vx-textarea` · `vx-check` · `vx-switch` · `vx-segment` · `vx-panel` · `vx-ledger` (label/value rows) · `vx-figures` (metric strip) · `vx-stamp` · `vx-badge` · `vx-notice` · `vx-empty` · `vx-unavailable` · `vx-table` (`.stack` collapses to cards below 768 px) · `vx-tabs` · `vx-searchbar` · `vx-result` · `vx-term` · `vx-overview` · `vx-filter-panel` (becomes a bottom sheet on phones) · `vx-list` · `vx-cards`.
+`vx-btn` (primary · quiet · danger · danger-solid · sm · icon) · `vx-input` / `vx-select` / `vx-textarea` · `vx-check` · `vx-switch` · `vx-segment` · `vx-panel` · `vx-ledger` (label/value rows) · `vx-figures` (metric strip) · `vx-stamp` · `vx-badge` · `vx-notice` · `vx-empty` · `vx-unavailable` · `vx-table` (`.stack` collapses to cards below 768 px) · `vx-tabs` · `vx-searchbar` · `vx-result` · `vx-term` (with `.tf` count) · `vx-score` · `vx-overview` · `vx-filter-panel` (becomes a bottom sheet on phones) · `vx-list` · `vx-cards`.
 
 Bootstrap 5.3 supplies dropdowns, modals, offcanvas, toasts, tooltips and popovers. They're themed through Bootstrap's CSS variables so they follow every theme and accent.
+
+## Ranked results
+
+A search result reads top to bottom: provenance line (source, subject, date, file), title, snippet,
+then the evidence row.
+
+- **Score chip (`vx-score`).** A small outlined mono label, `score 12`. It's a plain count, so it
+  never takes a `%`, a bar, stars or a colour scale that would suggest a probability. Its accessible
+  name spells out the sum ("Score 12: inverted ×3 + index ×9").
+- **Per-term counts (`vx-term .tf`).** Each matched word shows how often it occurs, e.g. `index ×9`.
+  Together they make up the score, so the explanation is visible without a tooltip. Missing words
+  keep the struck-through `vx-term.missing` style.
+- **Snippets (`.excerpt[data-snippet]`).** The server returns the passage text and `[start, end)`
+  highlight ranges, never HTML. `highlightRanges` escapes every segment and adds only
+  `<mark class="vx-mark">`. A leading or trailing `…` marks cut text, with a space after
+  sentence-ending punctuation. When the words only occur in the title, the opening is shown with an
+  "Opening" label.
+- **Method.** "How results are ranked" opens a popover with the ranking rule. The measured response
+  time sits beside it in muted tabular figures.
+- Contrast for all of the above is checked by axe in the light, dark and OLED themes.
