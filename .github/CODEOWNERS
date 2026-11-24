@@ -11,6 +11,7 @@
 /run.py                             @jiteshgulati
 /backend/                           @jiteshgulati
 /scripts/owner_recovery.py          @jiteshgulati
+/scripts/smoke_test.py              @jiteshgulati
 /tests/backend/                     @jiteshgulati
 /docs/architecture.md               @jiteshgulati
 /docs/api.md                        @jiteshgulati
@@ -36,9 +37,10 @@
 
 # Shared modules: changes need both developers
 /backend/app.py                     @jiteshgulati @chaitanya-gupta-07
-/backend/search/preview.py          @jiteshgulati @chaitanya-gupta-07
+/backend/search/overview.py         @jiteshgulati @chaitanya-gupta-07
+/backend/services/search.py         @jiteshgulati @chaitanya-gupta-07
 /backend/services/corpus.py         @jiteshgulati @chaitanya-gupta-07
-/tests/backend/test_index_preview.py @jiteshgulati @chaitanya-gupta-07
+/tests/backend/test_search_api.py   @jiteshgulati @chaitanya-gupta-07
 /tests/backend/test_api_workspace.py @jiteshgulati @chaitanya-gupta-07
 /docs/test-results.md               @jiteshgulati @chaitanya-gupta-07
 /docs/week1-checklist.md            @jiteshgulati @chaitanya-gupta-07
