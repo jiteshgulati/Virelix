@@ -104,7 +104,9 @@ Environment: Python 3.14.4 · Node 24.21 · Playwright 1.65.1 · Chrome Headless
 
 - **Windows (native):** the full backend suite ran on Windows Python 3.14.7. `py run.py` started the server, which served pages and assets, returned 404 for `/data/…`, held `server.lock`, and refused a second instance while the first kept running.
 - **Linux:** full backend and browser suites ran (WSL2 Ubuntu, Python 3.14.4).
-- **macOS:** not tested locally. The GitHub Actions workflow (`.github/workflows/tests.yml`) runs the backend suite on Ubuntu, Windows and macOS for every push and pull request.
+- **macOS:** the backend suite passes in GitHub Actions on `macos-latest`. It hasn't been tested interactively on a Mac.
+- **Continuous integration:** `.github/workflows/tests.yml` runs on every push and pull request. Run 45334933998 (commit `795d9fa`) passed all four jobs: backend on Ubuntu, Windows and macOS (Python 3.12), and the browser suite on Ubuntu.
+- **CI-found test races, fixed in `795d9fa`:** the first CI run exposed two browser tests that only passed on slower machines. One pressed the skip link before the app had rendered; the other's "Suspended" check also matched the member's own name. Both are fixed and repeat-tested.
 - **Fixed:** the data-folder check called `os.kill(pid, 0)`, which on Windows *terminates* the process instead of probing it. It's now an OS-level file lock (`msvcrt.locking` on Windows, `fcntl.flock` elsewhere) that the OS releases if the server crashes (`test_datadir_lock.py`).
 
 ## Not covered by automation

@@ -153,8 +153,8 @@ Node.js and Playwright are development tools only. Latest verified results: [doc
 |---|---|
 | Windows (native Python 3.14) | Backend suite run and the server started, served pages and refused a second instance on a real Windows install. The browser suite hasn't been run on Windows |
 | Linux (Python 3.14, WSL2 Ubuntu) | Backend and browser suites run |
-| macOS | Not tested locally. Uses only portable standard-library calls (`fcntl` locking, as on Linux) |
-| CI | GitHub Actions runs the backend suite on Ubuntu, Windows and macOS and the browser suite on Ubuntu for every push and pull request |
+| macOS | Backend suite passes in GitHub Actions (`macos-latest`). Not tested interactively |
+| CI | GitHub Actions runs the backend suite on Ubuntu, Windows and macOS and the browser suite on Ubuntu for every push and pull request. All four jobs passed on publication |
 
 ## Project structure
 
